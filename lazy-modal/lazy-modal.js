@@ -72,7 +72,7 @@ class LazyModal extends HTMLElement {
                 this.append(await LazyModal.#html(this.getAttribute('modal-content')));
 
             // console.log('LazyModal: Loading assets');
-            return this.#loadingAssetsPromise;
+            // return this.#loadingAssetsPromise;
         };
 
         // Load assets when the modal is visible
