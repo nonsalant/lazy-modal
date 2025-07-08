@@ -1,0 +1,87 @@
+<div>
+    <h2>General example</h2>
+	<storage-form>
+		<form>
+			<label>
+				Example
+				<input type="text" name="example" value="value" />
+			</label>
+			<button>Submit</button>
+		</form>
+	</storage-form>
+	<hr />
+	<h2>
+		Example of submitting with
+		<code>change</code>
+		event instead of a submit button
+	</h2>
+	<p>Use case for light/dark mode.</p>
+	<storage-form>
+		<form>
+			<label>
+				<input type="radio" name="theme" value="dark" />
+				<span>Dark mode</span>
+			</label>
+			<label>
+				<input type="radio" name="theme" value="light" />
+				<span>Light mode</span>
+			</label>
+			<label>
+				<input type="radio" name="theme" value="" checked />
+				<span>Default mode</span>
+			</label>
+			<br />
+			<label>
+				<input type="hidden" name="contrast" value />
+				<input type="checkbox" name="contrast" value="true" />
+				<span>High contrast</span>
+			</label>
+		</form>
+	</storage-form>
+	<hr />
+	<h2>
+		Example of hooking into
+		<code>storage</code>
+		event
+	</h2>
+	<storage-form>
+		<form>
+			<label>
+				Update the
+				<code>output</code>
+				by checking the box
+				<input type="hidden" name="output" value />
+				<input type="checkbox" name="output" value="updated" />
+			</label>
+		</form>
+	</storage-form>
+	<hr>
+	<output></output>
+	<script type="module">
+        console.log("storage-form demo loaded");
+		const updatePage = () => {
+			document.querySelector("output").innerHTML = JSON.stringify(
+				window.localStorage
+			);
+		};
+		window.addEventListener("storage", updatePage);
+		updatePage();
+	</script>
+	<style>
+		:root {
+			color-scheme: light dark;
+		}
+		:root:has([value="dark"]:checked) {
+			color-scheme: dark;
+		}
+		:root:has([value="light"]:checked) {
+			color-scheme: light;
+		}
+		:root:has([name="contrast"]:checked) {
+			font-weight: bold;
+		}
+		output {
+			font-family: monospace; overflow: auto; display: block;
+		}
+	</style>
+</div>

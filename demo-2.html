@@ -1,0 +1,239 @@
+<div>
+    <action-table urlparams store="animal-table" id="animal-table">
+		<div>
+			<action-table-filters class="flex flex-col">
+				<h3>
+					Filters
+					<small><button type="reset" disabled>Reset</button></small>
+				</h3>
+				<div class="grid">
+					<div class="flex flex-col">
+						<h4>Action Table Filter Elements: Select Menu</h4>
+						<div class="flex">
+							<action-table-filter-menu name="Animal" exact></action-table-filter-menu> <em>this filter uses `exact`</em>
+						</div>
+						<div class="flex">
+							<action-table-filter-menu name="Day"></action-table-filter-menu>
+							<em>options based on td `data-filter`</em>
+						</div>
+						<div class="flex">
+							<action-table-filter-menu name="Team"></action-table-filter-menu>
+							<em>options ordered via th `data-order`</em>
+						</div>
+					</div>
+					<div class="flex flex-col">
+						<h4>Action Table Filter Elements: Checkbox/Radio</h4>
+						<action-table-filter-menu name="Color" type="checkbox" label="Color (default inclusive)"></action-table-filter-menu>
+						<action-table-filter-menu name="Actions" type="checkbox" exclusive label="Actions (exclusive)"></action-table-filter-menu>
+					</div>
+					<div>
+						<h4>Action Table Filter Elements: Switch</h4>
+						<div>
+							<action-table-filter-switch class="star" name="Favs"></action-table-filter-switch>
+						</div>
+						<div>
+							<action-table-filter-switch class="switch" name="Switch"></action-table-filter-switch>
+						</div>
+					</div>
+					<div class="flex flex-col">
+						<h4>Action Table Filter Search</h4>
+						<div><label for="name-search">Search Name</label> <input id="name-search" name="name" type="search" placeholder="Search" size="14" /></div>
+						<div>
+							<label for="action-table-search">Search Whole Table</label>
+							<input id="action-table-search" name="action-table" type="search" placeholder="Search" size="14" />
+						</div>
+						<div>
+							<label for="action-table-partial-search">Search Animal/Name Cols</label>
+							<input id="action-table-partial-search" name="action-table" type="search" placeholder="Search" size="14" data-cols="Animal,Name" />
+						</div>
+					</div>
+				</div>
+			</action-table-filters>
+		</div>
+		<h3>Table</h3>
+		<div><em>Name cell is contenteditable. If you update the cel content, the table will update on blur.</em></div>
+		<div><em>Day is sorted via machine readable date in custom td data-sort</em></div>
+		<div><em>Team is sorted via custom th data-order</em></div>
+		<table>
+			<thead>
+				<tr>
+					<th>Animal</th>
+					<th>Name</th>
+					<th>Color</th>
+					<th>Actions</th>
+					<th>Favs</th>
+					<th>Switch</th>
+					<th>Day</th>
+					<th data-order="6 man,8 man,1A,2A,3A,4A,5A">Team</th>
+					<th>ID</th>
+					<th>Date</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>rabbit</td>
+					<td contenteditable>Attila</td>
+					<td>white</td>
+					<td><span>jump</span><span>eat</span></td>
+					<td>
+						<action-table-switch class="star" label="favorite"></action-table-switch>
+					</td>
+					<td class="switch"><input type="checkbox" aria-label="switch" /></td>
+					<td data-filter="Mon" data-sort="1970-01-02T10:00">Mon, 10am</td>
+					<td>5A</td>
+					<td>1</td>
+					<td><time datetime="2023-05-20T08:00:00-07:00">May 20, 2023 8:00 AM</time></td>
+				</tr>
+				<tr>
+					<td>small dog</td>
+					<td contenteditable>Sophia</td>
+					<td>black</td>
+					<td><span>run</span><span>eat</span><span>snuggle</span></td>
+					<td>
+						<action-table-switch checked class="star" label="favorite"></action-table-switch>
+					</td>
+					<td class="switch"><input type="checkbox" aria-label="switch" /></td>
+					<td data-filter="Tue" data-sort="1970-01-03T11:00">Tue, 11am</td>
+					<td>8 man</td>
+					<td>2</td>
+					<td><time datetime="2023-08-10T15:30:00-07:00">Aug 10, 2023 3:30 PM</time></td>
+				</tr>
+				<tr>
+					<td>rabbit</td>
+					<td contenteditable>Cindy</td>
+					<td>brown</td>
+					<td><span>jump</span><span>run</span></td>
+					<td>
+						<action-table-switch checked class="star" label="favorite"></action-table-switch>
+					</td>
+					<td class="switch"><input type="checkbox" checked aria-label="switch" /></td>
+					<td data-filter="Sat" data-sort="1970-01-07T13:00">Sat, 1pm</td>
+					<td>6 man</td>
+					<td>3</td>
+					<td><time datetime="2023-03-25T12:45:00-07:00">Mar 25, 2023 12:45 PM</time></td>
+				</tr>
+				<tr>
+					<td>raccoon</td>
+					<td contenteditable>Sewer</td>
+					<td>gray</td>
+					<td><span>run</span><span>eat</span><span>hide</span></td>
+					<td>
+						<action-table-switch class="star" label="favorite"></action-table-switch>
+					</td>
+					<td class="switch"><input type="checkbox" aria-label="switch" /></td>
+					<td data-filter="Sun" data-sort="1970-01-01T14:00">Sun, 2pm</td>
+					<td>8 man</td>
+					<td>4</td>
+					<td><time datetime="2023-11-02T09:15:00-07:00">Nov 2, 2023 9:15 AM</time></td>
+				</tr>
+				<tr>
+					<td>dog</td>
+					<td contenteditable>Ziggy</td>
+					<td>gray</td>
+					<td><span>run</span><span>snuggle</span></td>
+					<td>
+						<action-table-switch class="star" label="favorite"></action-table-switch>
+					</td>
+					<td class="switch"><input type="checkbox" aria-label="switch" /></td>
+					<td data-filter="Mon" data-sort="1970-01-02T14:00">Mon, 3pm</td>
+					<td>4A</td>
+					<td>5</td>
+					<td><time datetime="2023-06-15T18:20:00-07:00">Jun 15, 2023 6:20 PM</time></td>
+				</tr>
+				<tr>
+					<td>raccoon</td>
+					<td contenteditable>Wrapper</td>
+					<td>brown</td>
+					<td><span>eat</span></td>
+					<td>
+						<action-table-switch class="star" label="favorite"></action-table-switch>
+					</td>
+					<td class="switch"><input type="checkbox" checked aria-label="switch" /></td>
+					<td data-filter="Sun" data-sort="1970-01-01T10:00">Sun, 10am</td>
+					<td>2A</td>
+					<td>6</td>
+					<td><time datetime="2023-09-30T11:00:00-07:00">Sep 30, 2023 11:00 AM</time></td>
+				</tr>
+				<tr>
+					<td>cat</td>
+					<td contenteditable>Tommy</td>
+					<td>brown</td>
+					<td><span>run</span><span>explore</span></td>
+					<td>
+						<action-table-switch checked class="star" label="favorite"></action-table-switch>
+					</td>
+					<td class="switch"><input type="checkbox" aria-label="switch" /></td>
+					<td data-filter="Tue" data-sort="1970-01-03T11:00">Tue, 11am</td>
+					<td>3A</td>
+					<td>7</td>
+					<td><time datetime="2023-04-08T14:10:00-07:00">Apr 8, 2023 2:10 PM</time></td>
+				</tr>
+				<tr>
+					<td>cat</td>
+					<td contenteditable>Steve</td>
+					<td>black</td>
+					<td><span>run</span><span>snuggle</span></td>
+					<td>
+						<action-table-switch class="star" checked label="favorite"></action-table-switch>
+					</td>
+					<td class="switch"><input type="checkbox" checked aria-label="switch" /></td>
+					<td data-filter="Wed" data-sort="1970-01-03T12:00">Wed, 12pm</td>
+					<td>1A</td>
+					<td>8</td>
+					<td>Jul 5, 2023 4:45 PM</td>
+				</tr>
+			</tbody>
+		</table>
+		<action-table-no-results>
+			<p class="flex">
+				<strong><em>No results found</em></strong> <button type="reset">Reset Filters</button>
+			</p>
+		</action-table-no-results>
+	</action-table>
+	<style>
+		[triggers=".table-trigger"] { color-scheme: light; }
+		.grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 2em;
+		}
+		.flex {
+			display: flex;
+			gap: 0.4em 0.6em;
+			align-items: center;
+		}
+		.flex-col {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+		.flex-wrap {
+			flex-wrap: wrap;
+		}
+		h2,
+		h3,
+		h4,
+		h5,
+		h6 {
+			margin: 1em 0 0.2em;
+		}
+		*> :is(h2, h3, h4, h5, h6):first-child {
+			margin-top: 0;
+		}
+		action-table-filter-menu {
+			display: flex;
+		}
+		.my-4 {
+			margin-top: 1rem;
+			margin-bottom: 1rem;
+		}
+		.p-2 {
+			padding: 0.5rem;
+		}
+		.bg-gray {
+			background-color: lightgray;
+		}
+		.w-full {
+			width: 100%;
+		}
+	</style>
+</div>

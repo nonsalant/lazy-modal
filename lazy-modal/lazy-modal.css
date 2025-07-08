@@ -1,0 +1,68 @@
+/* Modal */
+/* https://github.com/nonsalant/geo-locator/blob/main/styles/lazy-modal.css */
+
+lazy-modal:not(:defined) { display: none; }
+
+:where(lazy-modal, .modal) {
+    --_modal-ease: var(--back-out, linear(0 0%,0.1935 4.37%,0.3671 8.83%,0.521 13.38%,0.6557 18.04%,0.7716 22.82%,0.869 27.73%,0.9488 32.81%,1.0111 38.08%,1.0512 42.81%,1.0792 47.75%,1.0953 52.97%,1.1 58.55%,1.0956 63.36%,1.0838 68.73%,1.0119 90.98%,1.0029 95.69%,1 100%));
+    max-width: 90dvw;
+    max-height: 90dvh;
+    padding: 1lh;
+    border-radius: 8px;
+    transition: translate .6s var(--_modal-ease);
+    transition-behavior: allow-discrete;
+    
+    &::backdrop {
+        backdrop-filter: brightness(.5);
+        /* Needed for ::backdrop */
+        /* transition: overlay .6s var(--back-out); */
+        /* transition: all .3s var(--back-out); */
+        /* transition-behavior: allow-discrete; */
+    }
+
+    @starting-style {
+        translate: 0 1.5lh;
+        &::backdrop {
+            opacity: 0;
+        }
+    }
+
+    header {
+        position: sticky;
+        top: 0;
+        z-index: 500;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        margin-block: 0;
+    }
+
+    .close-button {
+        appearance: none;
+        /* position: absolute; */
+        /* inset: .25lh .25lh auto auto; */
+        float: right;
+        width: 1.75lh;
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        margin-block-start: -1lh;
+        margin-inline-end: -1lh;
+        color: inherit;
+        &:not(:hover) {
+            background: transparent;
+        }
+        &:active {
+            /* background: #f0f0f0; */
+            scale: .9;
+            transform-origin: center;
+        }
+        & svg {
+            width: 1lh; height: 1lh;
+        }
+    }
+}
