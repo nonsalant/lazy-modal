@@ -2,7 +2,6 @@ import {
     cleanItems,
     isRemoteUrl,
     observeIntersection,
-    createElement,
     createStylesheet,
     generateRandomId
 } from './utils.js';
@@ -13,7 +12,7 @@ class LazyModal extends HTMLElement {
     // fetching from path is skipped if the #modalCss array is set    
     static #modalCssPaths = ['lazy-modal.css', 'aria-busy.css'];
 
-    #host; #triggers; #assetHost; #styles; #scripts; #loadingAssetsPromise;
+    #host; #triggers; #assetHost; #styles; #scripts; #modalContent; #loadingAssetsPromise;
 
     constructor() {
         super();
@@ -25,6 +24,7 @@ class LazyModal extends HTMLElement {
         this.#assetHost = this.hasAttribute('in-head') ? document.head : this;
         this.#styles = cleanItems(this.getAttribute('modal-styles')?.split(',')) ?? [];
         this.#scripts = cleanItems(this.getAttribute('modal-scripts')?.split(',')) ?? [];
+        this.#modalContent = this.getAttribute('modal-content') || '';
         this.popover = '';
     }
     
@@ -82,18 +82,12 @@ class LazyModal extends HTMLElement {
 
     #setupAssetLoading() {
         this.loadAssets = async () => {
-            if (this.#loadingAssetsPromise) return;
+            if (this.#loadingAssetsPromise) return this.#loadingAssetsPromise;
             this.#loadingAssetsPromise = Promise.all([
                 ...this.#styles.map(path => this.addStyle(path)),
-                ...this.#scripts.map(path => this.addScript(path))
+                ...this.#scripts.map(path => this.addScript(path)),
+                this.addContent(this.#modalContent) // Optionally inject modal content
             ]);
-
-            if (this.hasAttribute('modal-content')) { // Optionally inject modal content
-                this.append(await LazyModal.#html(this.getAttribute('modal-content')));
-                // Execute any scripts in the injected content
-                this.#executeScripts();
-            }
-
             // console.log('LazyModal: Loading assets');
             // return this.#loadingAssetsPromise;
         };
@@ -101,6 +95,14 @@ class LazyModal extends HTMLElement {
         // Load assets when the modal is visible
         // (fallback if no trigger was hovered/focused/clicked)
         observeIntersection(this, () => this.loadAssets());
+    }
+
+    async addContent(htmlPath) {
+        if (!htmlPath) return; // No content to add
+        const content = await LazyModal.#html(htmlPath);
+        this.insertAdjacentHTML('beforeend', content);
+        // Execute any scripts in the injected content
+        this.#executeScripts();
     }
 
     /**
@@ -136,7 +138,6 @@ class LazyModal extends HTMLElement {
             const element = document.createElement(tagName);
             attributes.className = this.resourceClass;
             Object.assign(element, attributes);
-            console.log(element)
             // Set the href or src attribute
             element[urlAttribute] = isRemoteUrl(path)
                 ? path
@@ -188,14 +189,16 @@ class LazyModal extends HTMLElement {
         const stylesheets = await LazyModal.#css(...LazyModal.#modalCssPaths);
         this.#host.adoptedStyleSheets.push(...stylesheets); // CSS for the modal
 
-        if (this.hasAttribute('close-button')) // Close button is optional
-            this.prepend(await LazyModal.#html(LazyModal.#closeButtonPath));
+        if (this.hasAttribute('close-button')) { // Close button is optional
+            const closeButtonHtml = await LazyModal.#html(LazyModal.#closeButtonPath);
+            this.insertAdjacentHTML('afterbegin', closeButtonHtml);
+        }
     }
 
     // Load and statically cache HTML
     static async #html(path) {
         // skip fetching if the HTML is set in LazyModal.#closeButton
-        if (LazyModal.#closeButton) return createElement(LazyModal.#closeButton);
+        if (LazyModal.#closeButton) return LazyModal.#closeButton;
 
         path = `${LazyModal.#basePath}/${path}`;
         try {
@@ -210,7 +213,7 @@ class LazyModal extends HTMLElement {
             }
             // Await the cached promise
             const html = await LazyModal.#htmlPromiseCache.get(path);
-            return createElement(html) ?? '';
+            return html ?? '';
         } catch (error) { console.error('Failed to load html:', error); }
     }
     static #htmlPromiseCache = new Map();
