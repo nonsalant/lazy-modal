@@ -62,3 +62,38 @@ export async function createStylesheet(cssText) {
     await stylesheet.replace(cssText);
     return stylesheet;
 }
+
+/**
+ * Generates a random ID based on the provided parameter
+ * @param {number[]|number} param - An array of lengths for letters and digits
+ *                                  or a single number for an alphanumeric string
+ * @returns {string} A random ID string
+ * @example
+ * generateRandomId([2, 3, 2]); // Returns something like "aa123bb"
+ * generateRandomId(6); // Returns something like "a1b2c3"
+ */
+export function generateRandomId(param = [2,3,2]) {
+	if (Array.isArray(param)) {
+		return param.map((length, index) => {
+			if (index % 2 === 0) {
+				// Generate random letters
+				return Array.from({ length }, () =>
+					String.fromCharCode(97 + Math.floor(Math.random() * 26))
+				).join("");
+			} else {
+				// Generate random digits
+				return Array.from({ length }, () =>
+					Math.floor(Math.random() * 10)
+				).join("");
+			}
+		}).join("");
+	} 
+	else if (typeof param === 'number') {
+		// Generate random alphanumeric string
+		const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+		return Array.from({ length: param }, () =>
+				chars.charAt(Math.floor(Math.random() * chars.length))
+		).join("");
+	} 
+	else { throw new Error('Invalid parameter type'); }
+}

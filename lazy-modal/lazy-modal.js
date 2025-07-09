@@ -3,7 +3,8 @@ import {
     isRemoteUrl,
     observeIntersection,
     createElement,
-    createStylesheet
+    createStylesheet,
+    generateRandomId
 } from './utils.js';
 
 class LazyModal extends HTMLElement {
@@ -16,20 +17,27 @@ class LazyModal extends HTMLElement {
 
     constructor() {
         super();
+        this.id ||= `lazy-modal-${generateRandomId([2,3,2])}`; // Ensure a unique ID
+        this.resourceClass = `lazy-modal-resource-${this.id}`; // Class for resources
         this.#host = this.getRootNode(); // 'document' or a shadow root
         this.#triggers = this.#host.querySelectorAll(this.getAttribute('triggers'));
 
         this.#assetHost = this.hasAttribute('in-head') ? document.head : this;
         this.#styles = cleanItems(this.getAttribute('modal-styles')?.split(',')) ?? [];
         this.#scripts = cleanItems(this.getAttribute('modal-scripts')?.split(',')) ?? [];
-
         this.popover = '';
     }
-
+    
     connectedCallback() {
         this.#setupModalUi(); // Modal HTML and CSS
         this.#setupAssetLoading(); // Assets for what's inside the modal
         this.#addTriggerEvents();
+    }
+
+    disconnectedCallback() {
+        this.#removeTriggerEvents();
+        this.#loadingAssetsPromise = null; // Clear the loading promise
+        this.#assetHost.querySelectorAll(`.${this.resourceClass}`).forEach(el => el.remove());
     }
 
     #addTriggerEvents() {
@@ -44,6 +52,18 @@ class LazyModal extends HTMLElement {
             
             // Load assets when a trigger is visible
             // observeIntersection(trigger, () => this.loadAssets());
+        });
+    }
+
+    #removeTriggerEvents() {
+        if (!this.#triggers.length) return;
+
+        this.#triggers.forEach(trigger => {
+            ['mouseenter', 'focus'].forEach((event) => {
+                trigger.removeEventListener(event, () => this.loadAssets());
+            });
+
+            trigger.removeEventListener('click', this.handleClick.bind(this));
         });
     }
 
@@ -62,14 +82,17 @@ class LazyModal extends HTMLElement {
 
     #setupAssetLoading() {
         this.loadAssets = async () => {
-            if (this.#loadingAssetsPromise) return this.#loadingAssetsPromise;
+            if (this.#loadingAssetsPromise) return;
             this.#loadingAssetsPromise = Promise.all([
                 ...this.#styles.map(path => this.addStyle(path)),
                 ...this.#scripts.map(path => this.addScript(path))
             ]);
 
-            if (this.hasAttribute('modal-content')) // Optionally inject modal content
+            if (this.hasAttribute('modal-content')) { // Optionally inject modal content
                 this.append(await LazyModal.#html(this.getAttribute('modal-content')));
+                // Execute any scripts in the injected content
+                this.#executeScripts();
+            }
 
             // console.log('LazyModal: Loading assets');
             // return this.#loadingAssetsPromise;
@@ -111,7 +134,9 @@ class LazyModal extends HTMLElement {
     async #addResource(path, { tagName, attributes, urlAttribute = 'src' }) {
         return new Promise((resolve) => {
             const element = document.createElement(tagName);
+            attributes.className = this.resourceClass;
             Object.assign(element, attributes);
+            console.log(element)
             // Set the href or src attribute
             element[urlAttribute] = isRemoteUrl(path)
                 ? path
@@ -131,6 +156,29 @@ class LazyModal extends HTMLElement {
         const url = new URL(import.meta.url);
         const moduleUrl = url.pathname;
         this.#basePath = url.origin + moduleUrl.substring(0, moduleUrl.lastIndexOf('/'));
+    }
+
+    /**
+     * Execute any scripts found in the component's innerHTML
+     * This is needed because scripts injected via innerHTML don't execute automatically
+     * @private
+     */
+    #executeScripts() {
+        const scripts = this.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            
+            // Copy all attributes
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+            
+            // Copy the script content
+            newScript.textContent = oldScript.textContent;
+            
+            // Replace the old script with the new one
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
     }
 
 
