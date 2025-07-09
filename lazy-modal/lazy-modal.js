@@ -25,7 +25,7 @@ class LazyModal extends HTMLElement {
         this.#styles = cleanItems(this.getAttribute('inner-styles')?.split(',')) ?? [];
         this.#scripts = cleanItems(this.getAttribute('inner-scripts')?.split(',')) ?? [];
         this.#modalContent = this.getAttribute('inner-content') || '';
-        this.popover = '';
+        this.popover ||= '';
     }
     
     connectedCallback() {

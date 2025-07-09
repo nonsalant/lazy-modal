@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lazy Modal Demo</title>
-    <script type="module" src="./lazy-modal/lazy-modal.js"></script>
+    <script type="module" src="../lazy-modal/lazy-modal.js"></script>
 </head>
 <body>
     <hgroup>
@@ -24,18 +24,18 @@
     <!-- MODALS -->
 
     <!-- storage form demo from: https://github.com/daviddarnes/storage-form -->
-    <lazy-modal 
+    <lazy-modal popover
         triggers=".storage-trigger"
         close-button 
-        inner-content="../demo-1.html"
+        inner-content="../examples/content/storage-form.html"
         inner-scripts="https://www.unpkg.com/@daviddarnes/storage-form@2.0.1/storage-form.js"
     ></lazy-modal>
 
     <!-- action table demo from: https://github.com/colinaut/action-table -->
-    <lazy-modal 
+    <lazy-modal popover
         triggers=".table-trigger"
         close-button 
-        inner-content="../demo-2.html"
+        inner-content="../examples/content/action-table.html"
         inner-styles="https://unpkg.com/@colinaut/action-table/dist/action-table.css" 
         inner-scripts="https://unpkg.com/@colinaut/action-table/dist/index.js, 
             https://unpkg.com/@colinaut/action-table/dist/action-table-switch.js"
