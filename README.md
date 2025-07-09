@@ -60,7 +60,7 @@ The path for the `inner-content` attribute (pointing to an HTML file) needs to b
 
 ### Server-Side Rendering the Modal Content (PHP Example)
 The path to the included content (HTML or another PHP file) needs to be relative to the current PHP file.
-```html
+```php
 <button class="my-trigger" type="button">Open the Popover</button>
 <lazy-modal popover
     triggers=".my-trigger"
