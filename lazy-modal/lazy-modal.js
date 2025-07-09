@@ -97,14 +97,6 @@ class LazyModal extends HTMLElement {
         observeIntersection(this, () => this.loadAssets());
     }
 
-    async addContent(htmlPath) {
-        if (!htmlPath) return; // No content to add
-        const content = await LazyModal.#html(htmlPath);
-        this.insertAdjacentHTML('beforeend', content);
-        // Execute any scripts in the injected content
-        this.#executeScripts();
-    }
-
     /**
      * Adds a stylesheet to the component
      * @param {string} cssPath - Path to the CSS file
@@ -151,12 +143,19 @@ class LazyModal extends HTMLElement {
         });
     }
 
-    // Static block to set the base path
-    static #basePath;
-    static {
-        const url = new URL(import.meta.url);
-        const moduleUrl = url.pathname;
-        this.#basePath = url.origin + moduleUrl.substring(0, moduleUrl.lastIndexOf('/'));
+    /** 
+     * Adds HTML content to the component
+     * @param {string} htmlPath - Path to the HTML file to inject
+     * @returns {Promise<void>} Resolves when the content is added
+     * @example
+     * await lazyModal.addContent('path/to/content.html');
+    */
+    async addContent(htmlPath) {
+        if (!htmlPath) return; // No content to add
+        const content = await LazyModal.#html(htmlPath);
+        this.insertAdjacentHTML('beforeend', content);
+        // Execute any scripts in the injected content
+        this.#executeScripts();
     }
 
     /**
@@ -180,6 +179,14 @@ class LazyModal extends HTMLElement {
             // Replace the old script with the new one
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
+    }
+
+    // Static block to set the base path
+    static #basePath;
+    static {
+        const url = new URL(import.meta.url);
+        const moduleUrl = url.pathname;
+        this.#basePath = url.origin + moduleUrl.substring(0, moduleUrl.lastIndexOf('/'));
     }
 
 
