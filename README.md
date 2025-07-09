@@ -11,8 +11,8 @@ Popover starts loading assets when you hover or focus its trigger button(s).
 <button class="my-trigger" type="button">Storage Form</button>
 <lazy-modal
     triggers=".my-trigger"
-    inside-styles="https://example.com/modal-styles.css"
-    inside-scripts="https://example.com/modal-scripts.js"
+    inner-styles="https://example.com/modal-styles.css"
+    inner-scripts="https://example.com/modal-scripts.js"
     close-button
 >
     <!-- HTML goes here -->
