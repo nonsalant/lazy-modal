@@ -22,9 +22,9 @@ class LazyModal extends HTMLElement {
         this.#triggers = this.#host.querySelectorAll(this.getAttribute('triggers'));
 
         this.#assetHost = this.hasAttribute('in-head') ? document.head : this;
-        this.#styles = cleanItems(this.getAttribute('modal-styles')?.split(',')) ?? [];
-        this.#scripts = cleanItems(this.getAttribute('modal-scripts')?.split(',')) ?? [];
-        this.#modalContent = this.getAttribute('modal-content') || '';
+        this.#styles = cleanItems(this.getAttribute('inside-styles')?.split(',')) ?? [];
+        this.#scripts = cleanItems(this.getAttribute('inside-scripts')?.split(',')) ?? [];
+        this.#modalContent = this.getAttribute('inside-content') || '';
         this.popover = '';
     }
     
