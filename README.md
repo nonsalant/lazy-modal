@@ -36,8 +36,8 @@ The paths to for `inner-styles` and `inner-scripts` attributes can be paths rela
 <button class="my-trigger" type="button">Open the Popover</button>
 <lazy-modal popover
     triggers=".my-trigger"
-    inner-styles="../path/to/my-modal.css"
-    inner-scripts="https://example.com/my-modal.js"
+    inner-styles="../path/to/example.css"
+    inner-scripts="https://example.com/example.js"
     close-button
 >
     <!-- HTML goes here -->
@@ -50,9 +50,9 @@ The path for the `inner-content` attribute (pointing to an HTML file) needs to b
 <button class="my-trigger" type="button">Open the Popover</button>
 <lazy-modal popover
     triggers=".my-trigger"
-    inner-content="../path/to/my-modal.html"
-    inner-styles="../path/to/my-modal.css"
-    inner-scripts="../path/to/my-modal.js"
+    inner-content="../path/to/example.html"
+    inner-styles="../path/to/example.css"
+    inner-scripts="../path/to/example.js"
     close-button
 ></lazy-modal>
 ```
@@ -64,11 +64,11 @@ The path to the included content (HTML or another PHP file) needs to be relative
 <button class="my-trigger" type="button">Open the Popover</button>
 <lazy-modal popover
     triggers=".my-trigger"
-    inner-styles="../path/to/my-modal.css"
-    inner-scripts="../path/to/my-modal.js"
+    inner-styles="../path/to/example.css"
+    inner-scripts="../path/to/example.js"
     close-button
 >
-    <?php include 'path/to/my-modal.html'; ?>
+    <?php include 'path/to/example.html'; ?>
 </lazy-modal>
 ```
 (See the examples/ssr-demo.php file for a working example.)
