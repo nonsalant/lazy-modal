@@ -5,7 +5,7 @@ A popover that starts loading related assets (and, optionally, the content insid
 ## Demo
 [View a demo implementation on CodePen](https://codepen.io/nonsalant/pen/MYwjvoo)
 
-[![screenshot from the codepen demo](codepen-demo.png)](https://codepen.io/nonsalant/pen/MYwjvoo)
+[![screenshot from the codepen demo](examples/codepen-demo.png)](https://codepen.io/nonsalant/pen/MYwjvoo)
 *The demo shows two 3rd party web components ([storage-form](https://github.com/daviddarnes/storage-form) and [action-table](https://github.com/colinaut/action-table)) lazily loaded from CDNs when opened in popover modals*
 
 ## Attributes
