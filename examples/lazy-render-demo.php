@@ -46,16 +46,5 @@
             <?php include 'content/action-table.html'; ?>
         </template>
     </lazy-modal>
-    <lazy-modal popover
-        triggers=".table-trigger"
-        close-button in-head
-        inner-styles="https://unpkg.com/@colinaut/action-table/dist/action-table.css" 
-        inner-scripts="https://unpkg.com/@colinaut/action-table/dist/index.js, 
-            https://unpkg.com/@colinaut/action-table/dist/action-table-switch.js"
-    >
-        <template>
-            <?php include 'content/action-table.html'; ?>
-        </template>
-    </lazy-modal>
 </body>
 </html>

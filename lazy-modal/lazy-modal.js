@@ -3,7 +3,6 @@ import {
     isRemoteUrl,
     observeIntersection,
     createStylesheet,
-    // generateRandomId
 } from './utils.js';
 
 class LazyModal extends HTMLElement {
@@ -17,8 +16,6 @@ class LazyModal extends HTMLElement {
 
     constructor() {
         super();
-        // this.id ||= `lazy-modal-${generateRandomId([2,3,2])}`; // Ensure a unique ID
-        // this.resourceClass = `lazy-modal-resource-${this.id}`; // Class for resources
         this.#host = this.getRootNode(); // 'document' or a shadow root
         this.#triggers = this.#host.querySelectorAll(this.getAttribute('triggers'));
 
@@ -39,7 +36,6 @@ class LazyModal extends HTMLElement {
     // disconnectedCallback() {
     //     this.#removeTriggerEvents();
     //     this.#loadingAssetsPromise = null; // Clear the loading promise
-    //     this.#assetHost.querySelectorAll(`.${this.resourceClass}`).forEach(el => el.remove());
     // }
 
     #addTriggerEvents() {
@@ -59,12 +55,10 @@ class LazyModal extends HTMLElement {
 
     // #removeTriggerEvents() {
     //     if (!this.#triggers.length) return;
-
     //     this.#triggers.forEach(trigger => {
     //         ['mouseenter', 'focus'].forEach((event) => {
     //             trigger.removeEventListener(event, () => this.loadAssets());
     //         });
-
     //         trigger.removeEventListener('click', this.handleClick.bind(this));
     //     });
     // }
@@ -193,7 +187,6 @@ class LazyModal extends HTMLElement {
 
         return new Promise((resolve) => {
             const element = document.createElement(tagName);
-            // attributes.className = this.resourceClass;
             Object.assign(element, attributes);
             // Set the href or src attribute
             element[urlAttribute] = isRemoteUrl(path)
