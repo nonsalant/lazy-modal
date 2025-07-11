@@ -3,7 +3,7 @@ import {
     isRemoteUrl,
     observeIntersection,
     createStylesheet,
-    generateRandomId
+    // generateRandomId
 } from './utils.js';
 
 class LazyModal extends HTMLElement {
@@ -12,12 +12,13 @@ class LazyModal extends HTMLElement {
     // fetching from path is skipped if the #modalCss array is set    
     static #modalCssPaths = ['lazy-modal.css', 'aria-busy.css'];
 
-    #host; #triggers; #assetHost; #styles; #scripts; #modalContent; #lazyRenderTemplate; #loadingAssetsPromise;
+    #host; #triggers; #assetHost; #styles; #scripts;
+    #modalContent; #lazyRenderTemplate; #loadingAssetsPromise;
 
     constructor() {
         super();
-        this.id ||= `lazy-modal-${generateRandomId([2,3,2])}`; // Ensure a unique ID
-        this.resourceClass = `lazy-modal-resource-${this.id}`; // Class for resources
+        // this.id ||= `lazy-modal-${generateRandomId([2,3,2])}`; // Ensure a unique ID
+        // this.resourceClass = `lazy-modal-resource-${this.id}`; // Class for resources
         this.#host = this.getRootNode(); // 'document' or a shadow root
         this.#triggers = this.#host.querySelectorAll(this.getAttribute('triggers'));
 
@@ -35,11 +36,11 @@ class LazyModal extends HTMLElement {
         this.#addTriggerEvents();
     }
 
-    disconnectedCallback() {
-        this.#removeTriggerEvents();
-        this.#loadingAssetsPromise = null; // Clear the loading promise
-        this.#assetHost.querySelectorAll(`.${this.resourceClass}`).forEach(el => el.remove());
-    }
+    // disconnectedCallback() {
+    //     this.#removeTriggerEvents();
+    //     this.#loadingAssetsPromise = null; // Clear the loading promise
+    //     this.#assetHost.querySelectorAll(`.${this.resourceClass}`).forEach(el => el.remove());
+    // }
 
     #addTriggerEvents() {
         if (!this.#triggers.length) return console.warn('LazyModal: No trigger element found');
@@ -56,17 +57,17 @@ class LazyModal extends HTMLElement {
         });
     }
 
-    #removeTriggerEvents() {
-        if (!this.#triggers.length) return;
+    // #removeTriggerEvents() {
+    //     if (!this.#triggers.length) return;
 
-        this.#triggers.forEach(trigger => {
-            ['mouseenter', 'focus'].forEach((event) => {
-                trigger.removeEventListener(event, () => this.loadAssets());
-            });
+    //     this.#triggers.forEach(trigger => {
+    //         ['mouseenter', 'focus'].forEach((event) => {
+    //             trigger.removeEventListener(event, () => this.loadAssets());
+    //         });
 
-            trigger.removeEventListener('click', this.handleClick.bind(this));
-        });
-    }
+    //         trigger.removeEventListener('click', this.handleClick.bind(this));
+    //     });
+    // }
 
     async handleClick(e) {
         e.preventDefault();
@@ -75,7 +76,7 @@ class LazyModal extends HTMLElement {
         trigger.ariaBusy = true;
         try {
             await this.loadAssets();
-            this.togglePopover({ source: trigger });
+            this?.togglePopover({ source: trigger });
         }
         catch (error) { console.error('Failed to handle click:', error); }
         finally { trigger.ariaBusy = null; }
@@ -88,7 +89,6 @@ class LazyModal extends HTMLElement {
             this.#lazyRender(); // Lazy render template if provided
             this.#loadingAssetsPromise = Promise.all([
                 this.addContent(this.#modalContent), // Optionally inject external content
-                // this.#executeScripts(), // Execute any scripts in the injected content
                 ...this.#styles.map(path => this.addStyle(path)),
                 ...this.#scripts.map(path => this.addScript(path)),
             ]);
@@ -168,6 +168,8 @@ class LazyModal extends HTMLElement {
         return this.#addResource(jsPath, { tagName: 'script', attributes: { type: 'module' }, urlAttribute: 'src' });
     }
 
+    static #globalResources = new Set(); // Track resources added to document.head
+
     /**
      * Creates and loads a resource (stylesheet or script)
      * @param {string} path - Path to the resource
@@ -179,9 +181,19 @@ class LazyModal extends HTMLElement {
      * @private
      */
     async #addResource(path, { tagName, attributes, urlAttribute = 'src' }) {
+        const fullPath = isRemoteUrl(path) ? path : `${LazyModal.#basePath}/${path}`;
+        // If adding to document.head, check if already exists
+        if (this.#assetHost === document.head) {
+            const resourceKey = `${tagName}:${fullPath}`;
+            if (LazyModal.#globalResources.has(resourceKey)) {
+                return Promise.resolve(); // Already loaded
+            }
+            LazyModal.#globalResources.add(resourceKey);
+        }
+
         return new Promise((resolve) => {
             const element = document.createElement(tagName);
-            attributes.className = this.resourceClass;
+            // attributes.className = this.resourceClass;
             Object.assign(element, attributes);
             // Set the href or src attribute
             element[urlAttribute] = isRemoteUrl(path)
