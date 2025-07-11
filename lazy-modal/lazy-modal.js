@@ -12,7 +12,7 @@ class LazyModal extends HTMLElement {
     // fetching from path is skipped if the #modalCss array is set    
     static #modalCssPaths = ['lazy-modal.css', 'aria-busy.css'];
 
-    #host; #triggers; #assetHost; #styles; #scripts; #modalContent; #loadingAssetsPromise;
+    #host; #triggers; #assetHost; #styles; #scripts; #modalContent; #lazyRenderTemplate; #loadingAssetsPromise;
 
     constructor() {
         super();
@@ -25,6 +25,7 @@ class LazyModal extends HTMLElement {
         this.#styles = cleanItems(this.getAttribute('inner-styles')?.split(',')) ?? [];
         this.#scripts = cleanItems(this.getAttribute('inner-scripts')?.split(',')) ?? [];
         this.#modalContent = this.getAttribute('inner-content') || '';
+        this.#lazyRenderTemplate = this.querySelector('& > template') || null;
         this.popover ||= '';
     }
     
@@ -83,10 +84,13 @@ class LazyModal extends HTMLElement {
     #setupAssetLoading() {
         this.loadAssets = async () => {
             if (this.#loadingAssetsPromise) return this.#loadingAssetsPromise;
+
+            this.#lazyRender(); // Lazy render template if provided
             this.#loadingAssetsPromise = Promise.all([
+                this.addContent(this.#modalContent), // Optionally inject external content
+                // this.#executeScripts(), // Execute any scripts in the injected content
                 ...this.#styles.map(path => this.addStyle(path)),
                 ...this.#scripts.map(path => this.addScript(path)),
-                this.addContent(this.#modalContent) // Optionally inject modal content
             ]);
             // console.log('LazyModal: Loading assets');
             // return this.#loadingAssetsPromise;
@@ -95,6 +99,55 @@ class LazyModal extends HTMLElement {
         // Load assets when the modal is visible
         // (fallback if no trigger was hovered/focused/clicked)
         observeIntersection(this, () => this.loadAssets());
+    }
+
+    /**
+     * If the inline content is wrapped in a template, clone it and append to the modal
+     * This allows for lazy rendering of the modal content
+     * @private
+     */
+    #lazyRender() {
+        if (this.#lazyRenderTemplate) {
+            // If a template is provided, clone its content and append it
+            const content = this.#lazyRenderTemplate.content.cloneNode(true);
+            this.appendChild(content);
+        }
+    }
+
+    /** 
+     * Adds HTML content to the component
+     * @param {string} htmlPath - Path to the HTML file to inject
+     * @returns {Promise<void>} Resolves when the content is added
+     * @example
+     * await lazyModal.addContent('path/to/content.html');
+    */
+    async addContent(htmlPath) {
+        if (!htmlPath) return; // No content to add
+        const content = await LazyModal.#html(htmlPath);
+        this.insertAdjacentHTML('beforeend', content);
+        this.#executeScripts(); // Execute any scripts in the injected content
+    }
+
+    /**
+     * Execute any scripts found in the component's innerHTML
+     * This is needed because scripts injected via innerHTML don't execute automatically
+     * @private
+     */
+    #executeScripts(context = this) {
+        context.querySelectorAll('script').forEach(oldScript => {
+            const newScript = document.createElement('script');
+
+            // Copy all attributes
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+
+            // Copy the script content
+            newScript.textContent = oldScript.textContent;
+
+            // Replace the old script with the new one
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
     }
 
     /**
@@ -143,43 +196,6 @@ class LazyModal extends HTMLElement {
         });
     }
 
-    /** 
-     * Adds HTML content to the component
-     * @param {string} htmlPath - Path to the HTML file to inject
-     * @returns {Promise<void>} Resolves when the content is added
-     * @example
-     * await lazyModal.addContent('path/to/content.html');
-    */
-    async addContent(htmlPath) {
-        if (!htmlPath) return; // No content to add
-        const content = await LazyModal.#html(htmlPath);
-        this.insertAdjacentHTML('beforeend', content);
-        // Execute any scripts in the injected content
-        this.#executeScripts();
-    }
-
-    /**
-     * Execute any scripts found in the component's innerHTML
-     * This is needed because scripts injected via innerHTML don't execute automatically
-     * @private
-     */
-    #executeScripts() {
-        const scripts = this.querySelectorAll('script');
-        scripts.forEach(oldScript => {
-            const newScript = document.createElement('script');
-            
-            // Copy all attributes
-            Array.from(oldScript.attributes).forEach(attr => {
-                newScript.setAttribute(attr.name, attr.value);
-            });
-            
-            // Copy the script content
-            newScript.textContent = oldScript.textContent;
-            
-            // Replace the old script with the new one
-            oldScript.parentNode.replaceChild(newScript, oldScript);
-        });
-    }
 
     // Static block to set the base path
     static #basePath;

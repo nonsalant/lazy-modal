@@ -72,3 +72,23 @@ The path to the included content (HTML or another PHP file) needs to be relative
 </lazy-modal>
 ```
 (See the examples/ssr-demo.php file for a working example.)
+
+### Client-Side Lazy Rendering the Modal Content
+To lazy render the modal content, you can wrap it in a `<template>` tag. The content (initially inert) will be cloned and appended to the modal the first time the modal trigger is hovered/focused/clicked or if the popover is shown in some other way.
+
+This can be useful for heavyweight or stateful components that you don't want to instantiate eagerly.
+
+```html
+<button class="my-trigger" type="button">Open the Popover</button>
+<lazy-modal popover
+    triggers=".my-trigger"
+    inner-styles="../path/to/example.css"
+    inner-scripts="../path/to/example.js"
+    close-button
+>
+    <template>
+        <!-- HTML goes here -->
+    </template>
+</lazy-modal>
+```
+(See the examples/lazy-render-demo.php file for a working example -- lazy rendering happens client-side, but the content inside the templates is included server-side to keep the example short and readable.)
