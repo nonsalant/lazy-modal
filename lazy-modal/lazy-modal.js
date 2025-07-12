@@ -38,8 +38,11 @@ class LazyModal extends HTMLElement {
     }
 
     disconnectedCallback() {
-        this.#removeTriggerEvents();
-        this.#loadingAssetsPromise = null; // Clear the loading promise
+        if (!this.#triggers.length) return;
+        this.#abortController.abort(); // Removes all listeners at once
+        if (this.#loadOnVisible) this.#triggers.forEach(trigger => {
+            unobserveIntersection(this.#triggerObserver, trigger);
+        });
     }
 
     #addTriggerEvents() {
@@ -56,19 +59,8 @@ class LazyModal extends HTMLElement {
                 signal: this.#abortController.signal
             });
             
-            // Load assets when a trigger is visible
-            if (this.#loadOnVisible)
+            if (this.#loadOnVisible) // Load assets when a trigger is visible
                 this.#triggerObserver = observeIntersection(trigger, () => this.loadAssets());
-        });
-    }
-
-    #removeTriggerEvents() {
-        if (!this.#triggers.length) return;
-
-        this.#abortController.abort(); // Removes all listeners at once
-
-        if (this.#loadOnVisible) this.#triggers.forEach(trigger => {
-            unobserveIntersection(this.#triggerObserver, trigger);
         });
     }
 
