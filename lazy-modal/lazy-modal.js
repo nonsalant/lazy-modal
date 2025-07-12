@@ -2,8 +2,8 @@ import {
     cleanItems,
     isRemoteUrl,
     observeIntersection,
-    createStylesheet,
     unobserveIntersection,
+    createStylesheet,
 } from './utils.js';
 
 class LazyModal extends HTMLElement {
