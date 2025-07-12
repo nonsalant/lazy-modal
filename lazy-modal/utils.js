@@ -26,6 +26,7 @@ export function isRemoteUrl(path) {
  * @param {HTMLElement} element - The element to observe
  * @param {Function} callback - The function to call when the element is intersecting
  * @param {boolean} [once=true] - If true, the observer will unobserve the element after the first intersection
+ * @return {IntersectionObserver} The IntersectionObserver instance
  * @example
  * observeIntersection(document.querySelector('#myElement'), () => {
  *     console.log('Element is in view!');
@@ -33,12 +34,24 @@ export function isRemoteUrl(path) {
 */
 export function observeIntersection(element, callback, once=true) {
     const observer = new IntersectionObserver(([{isIntersecting}]) => {
-        if (isIntersecting) {
-            callback();
-            if (once) observer.unobserve(element);
-        }
-    });
-    observer.observe(element);
+		if (!isIntersecting) return;
+		callback();
+		if (once) observer.unobserve(element);
+	});
+	observer.observe(element);
+	return observer;
+}
+
+/**
+ * Unobserves an element from an IntersectionObserver
+ * @param {IntersectionObserver} observer - The IntersectionObserver instance
+ * @param {HTMLElement} element - The element to unobserve
+ * @example
+ * unobserveIntersection(myObserver, document.querySelector('#myElement'));
+*/
+export function unobserveIntersection(observer, element) {
+	if (!observer || !element) return;
+	observer.unobserve(element);
 }
 
 /**

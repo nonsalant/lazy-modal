@@ -11,11 +11,13 @@ class LazyModal extends HTMLElement {
     // fetching from path is skipped if the #modalCss array is set    
     static #modalCssPaths = ['lazy-modal.css', 'aria-busy.css'];
 
-    #host; #triggers; #assetHost; #styles; #scripts;
+    #host; #triggers; #assetHost; #styles; #scripts; #abortController;
     #modalContent; #lazyRenderTemplate; #loadingAssetsPromise;
 
     constructor() {
         super();
+        this.#abortController = new AbortController();
+
         this.#host = this.getRootNode(); // 'document' or a shadow root
         this.#triggers = this.#host.querySelectorAll(this.getAttribute('triggers'));
 
@@ -33,35 +35,32 @@ class LazyModal extends HTMLElement {
         this.#addTriggerEvents();
     }
 
-    // disconnectedCallback() {
-    //     this.#removeTriggerEvents();
-    //     this.#loadingAssetsPromise = null; // Clear the loading promise
-    // }
+    disconnectedCallback() {
+        this.#removeTriggerEvents();
+        this.#loadingAssetsPromise = null; // Clear the loading promise
+    }
 
     #addTriggerEvents() {
         if (!this.#triggers.length) return console.warn('LazyModal: No trigger element found');
 
         this.#triggers.forEach(trigger => {
             ['mouseenter', 'focus'].forEach((event) => {
-                trigger.addEventListener(event, () => this.loadAssets());
+                trigger.addEventListener(event, () => this.loadAssets(), {
+                    signal: this.#abortController.signal
+                });
             });
 
-            trigger.addEventListener('click', this.handleClick.bind(this));
-            
-            // Load assets when a trigger is visible
-            // observeIntersection(trigger, () => this.loadAssets());
+            trigger.addEventListener('click', this.handleClick.bind(this), {
+                signal: this.#abortController.signal
+            });
         });
     }
 
-    // #removeTriggerEvents() {
-    //     if (!this.#triggers.length) return;
-    //     this.#triggers.forEach(trigger => {
-    //         ['mouseenter', 'focus'].forEach((event) => {
-    //             trigger.removeEventListener(event, () => this.loadAssets());
-    //         });
-    //         trigger.removeEventListener('click', this.handleClick.bind(this));
-    //     });
-    // }
+    #removeTriggerEvents() {
+        if (!this.#triggers.length) return;
+
+        this.#abortController.abort(); // Removes all listeners at once
+    }
 
     async handleClick(e) {
         e.preventDefault();
@@ -78,6 +77,7 @@ class LazyModal extends HTMLElement {
 
     #setupAssetLoading() {
         this.loadAssets = async () => {
+            // only run once
             if (this.#loadingAssetsPromise) return this.#loadingAssetsPromise;
 
             this.#lazyRender(); // Lazy render template if provided
