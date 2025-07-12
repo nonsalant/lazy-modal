@@ -3,6 +3,7 @@ import {
     isRemoteUrl,
     observeIntersection,
     createStylesheet,
+    unobserveIntersection,
 } from './utils.js';
 
 class LazyModal extends HTMLElement {
@@ -11,15 +12,16 @@ class LazyModal extends HTMLElement {
     // fetching from path is skipped if the #modalCss array is set    
     static #modalCssPaths = ['lazy-modal.css', 'aria-busy.css'];
 
-    #host; #triggers; #assetHost; #styles; #scripts; #abortController;
+    #host; #triggers; #assetHost; #styles; #scripts;
+    #abortController; #loadOnVisible; #triggerObserver;
     #modalContent; #lazyRenderTemplate; #loadingAssetsPromise;
 
     constructor() {
         super();
-        this.#abortController = new AbortController();
-
         this.#host = this.getRootNode(); // 'document' or a shadow root
         this.#triggers = this.#host.querySelectorAll(this.getAttribute('triggers'));
+        this.#abortController = new AbortController();
+        this.#loadOnVisible = this.hasAttribute('load-on-visible');
 
         this.#assetHost = this.hasAttribute('in-head') ? document.head : this;
         this.#styles = cleanItems(this.getAttribute('inner-styles')?.split(',')) ?? [];
@@ -53,6 +55,10 @@ class LazyModal extends HTMLElement {
             trigger.addEventListener('click', this.handleClick.bind(this), {
                 signal: this.#abortController.signal
             });
+            
+            // Load assets when a trigger is visible
+            if (this.#loadOnVisible)
+                this.#triggerObserver = observeIntersection(trigger, () => this.loadAssets());
         });
     }
 
@@ -60,6 +66,10 @@ class LazyModal extends HTMLElement {
         if (!this.#triggers.length) return;
 
         this.#abortController.abort(); // Removes all listeners at once
+
+        if (this.#loadOnVisible) this.#triggers.forEach(trigger => {
+            unobserveIntersection(this.#triggerObserver, trigger);
+        });
     }
 
     async handleClick(e) {
