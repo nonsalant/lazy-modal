@@ -12,6 +12,7 @@ A popover that starts loading related assets (and, optionally, the content insid
 | Attribute        | Description |
 |------------------|-------------|
 | `triggers`       | Required attribute: A CSS selector for the trigger button(s). |
+| `load-on-visible`| If present, the modal will load everything when a trigger becomes visible in the viewport. If not present, the loading will happen when a trigger is hovered, focused, clicked, or if the popover is shown in some other way. |
 | `inner-styles`   | A comma-separated list of paths to stylesheets (relative to the lazy-modal.js file or absolute URLs). |
 | `inner-scripts`  | A comma-separated list of paths to scripts (relative to the lazy-modal.js file or absolute URLs). |
 | `inner-content`  | A path to an HTML file (relative to the lazy-modal.js file) that will be injected into the modal. |
