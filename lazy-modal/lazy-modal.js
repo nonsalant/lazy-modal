@@ -13,16 +13,22 @@ class LazyModal extends HTMLElement {
     static #modalCssPaths = ['lazy-modal.css', 'aria-busy.css'];
 
     #host; #triggers; #assetHost; #styles; #scripts;
-    #abortController; #loadOnVisible; #triggerObserver;
+    #abortController; #abortSignal; #loadOn; #triggerObserver;
     #modalContent; #lazyRenderTemplate; #loadingAssetsPromise;
 
     constructor() {
         super();
         this.#host = this.getRootNode(); // 'document' or a shadow root
+
         this.#triggers = this.#host.querySelectorAll(this.getAttribute('triggers'));
         this.#abortController = new AbortController();
-        this.#loadOnVisible = this.hasAttribute('load-on-visible');
+        this.#abortSignal = { signal: this.#abortController.signal };
 
+        const supportedLoadOnValues = ['click', 'hover', 'visible', 'load'];
+        this.#loadOn = supportedLoadOnValues.includes(this.getAttribute('load-on')) 
+            ? this.getAttribute('load-on') 
+            : 'hover';
+        
         this.#assetHost = this.hasAttribute('in-head') ? document.head : this;
         this.#styles = cleanItems(this.getAttribute('inner-styles')?.split(',')) ?? [];
         this.#scripts = cleanItems(this.getAttribute('inner-scripts')?.split(',')) ?? [];
@@ -34,33 +40,32 @@ class LazyModal extends HTMLElement {
     connectedCallback() {
         this.#setupModalUi(); // Modal HTML and CSS
         this.#setupAssetLoading(); // Assets for what's inside the modal
-        this.#addTriggerEvents();
+        this.#setupTriggerBehavior();
     }
-
+    
     disconnectedCallback() {
         if (!this.#triggers.length) return;
         this.#abortController.abort(); // Removes all listeners at once
-        if (this.#loadOnVisible) this.#triggers.forEach(trigger => {
+        if (this.#loadOn === 'visible') this.#triggers.forEach(trigger => {
             unobserveIntersection(this.#triggerObserver, trigger);
         });
     }
+    
+    #setupTriggerBehavior() {
+        if (this.#loadOn === 'load') this.loadAssets(); // Load assets immediately if 'load' is set
 
-    #addTriggerEvents() {
         if (!this.#triggers.length) return console.warn('LazyModal: No trigger element found');
 
         this.#triggers.forEach(trigger => {
-            ['mouseenter', 'focus'].forEach((event) => {
-                trigger.addEventListener(event, () => this.loadAssets(), {
-                    signal: this.#abortController.signal
-                });
+            trigger.addEventListener('click', this.handleClick.bind(this), this.#abortSignal);
+
+            if (this.#loadOn === 'hover') ['mouseenter', 'focus'].forEach((e) => {
+                trigger.addEventListener(e, () => this.loadAssets(), this.#abortSignal);
             });
 
-            trigger.addEventListener('click', this.handleClick.bind(this), {
-                signal: this.#abortController.signal
-            });
-            
-            if (this.#loadOnVisible) // Load assets when a trigger is visible
+            if (this.#loadOn === 'visible') {
                 this.#triggerObserver = observeIntersection(trigger, () => this.loadAssets());
+            }
         });
     }
 
@@ -74,7 +79,9 @@ class LazyModal extends HTMLElement {
             this?.togglePopover({ source: trigger });
         }
         catch (error) { console.error('Failed to handle click:', error); }
-        finally { trigger.ariaBusy = null; }
+        finally {
+            trigger.ariaBusy = null;
+        }
     }
 
     #setupAssetLoading() {
@@ -89,7 +96,7 @@ class LazyModal extends HTMLElement {
                 ...this.#scripts.map(path => this.addScript(path)),
             ]);
             // console.log('LazyModal: Loading assets');
-            // return this.#loadingAssetsPromise;
+            return this.#loadingAssetsPromise;
         };
 
         // Load assets when the modal is visible

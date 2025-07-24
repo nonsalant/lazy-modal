@@ -12,12 +12,12 @@ A popover that starts loading related assets (and, optionally, the content insid
 | Attribute        | Description |
 |------------------|-------------|
 | `triggers`       | Required attribute: A CSS selector for the trigger button(s). |
-| `load-on-visible`| If present, the modal will load everything when a trigger becomes visible in the viewport. If not present, the loading will happen when a trigger is hovered, focused, clicked, or if the popover is shown in some other way. |
 | `inner-styles`   | A comma-separated list of paths to stylesheets (relative to the lazy-modal.js file or absolute URLs). |
 | `inner-scripts`  | A comma-separated list of paths to scripts (relative to the lazy-modal.js file or absolute URLs). |
 | `inner-content`  | A path to an HTML file (relative to the lazy-modal.js file) that will be injected into the modal. |
 | `popover`        | This [native attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/popover) hides the modal before any JS is loaded. You can skip adding this to each modal (because it's added automatically if missing) and add this style somewhere in your CSS to avoid the initial flash of content: <br> `lazy-modal:not(:defined) { display: none; }` |
 | `close-button`   | If present adds an "x" button that closes the modal. You can skip this and add it manually (inside the modal element) with something like: <br> `<button onclick="this.closest('[popover]').hidePopover()" type="button"> Close </button>` |
+| `load-on`        | Possible values: <br>• `click` - the modal will load everything when a trigger is clicked. <br>• `hover` (default) - the modal will load everything when a trigger is hovered or focused. <br>• `visible` - the modal will load everything when a trigger becomes visible in the viewport. <br>• `load` - the modal will load everything immediately without looking for a trigger.|
 | `in-head`        | If present, the modal's styles and scripts will be added to the `<head>` of the document instead of inside the modal element. |
 
 ## Importing the Component
