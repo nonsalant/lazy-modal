@@ -1,13 +1,19 @@
 /**
- * Utility to trim and clean (empty items from) an array of strings
- * @param {Array<string>} arr - The array of strings to clean
- * @returns {Array<string>} A new array with trimmed and cleaned strings
+ * Utility to convert a CSV string into an array of trimmed, non-empty strings
+ * @param {string} csvString - The CSV string to convert
+ * @param {string} [delimiter=','] - The delimiter to split on (defaults to comma)
+ * @returns {Array<string>} A new array with trimmed, non-empty strings from the CSV
  * @example
- * cleanItems(['  hello  ', '  world  ', '', '  ']); // Returns ['hello', 'world']
-*/
-export function cleanItems(arr) {
-    if (!Array.isArray(arr)) return [];
-    return arr
+ * csvToArray('apple, banana, cherry'); // Returns ['apple', 'banana', 'cherry']
+ * csvToArray('apple; banana; cherry', ';'); // Returns ['apple', 'banana', 'cherry']
+ * csvToArray('  hello  ,  world  , , foo '); // Returns ['hello', 'world', 'foo']
+ */
+export function csvToArray(csvString, delimiter = ',') {
+    if (typeof csvString !== 'string') return [];
+    if (csvString.trim() === '') return [];
+    
+    return csvString
+        .split(delimiter)
         .map(item => item.trim())
         .filter(item => item); // Filter out empty strings
 }

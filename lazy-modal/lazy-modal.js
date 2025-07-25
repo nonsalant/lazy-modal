@@ -1,5 +1,5 @@
 import {
-    cleanItems,
+    csvToArray,
     isRemoteUrl,
     observeIntersection,
     unobserveIntersection,
@@ -30,8 +30,8 @@ class LazyModal extends HTMLElement {
             : 'hover';
         
         this.#assetHost = this.hasAttribute('in-head') ? document.head : this;
-        this.#styles = cleanItems(this.getAttribute('inner-styles')?.split(',')) ?? [];
-        this.#scripts = cleanItems(this.getAttribute('inner-scripts')?.split(',')) ?? [];
+        this.#styles = csvToArray(this.getAttribute('inner-styles'));
+        this.#scripts = csvToArray(this.getAttribute('inner-scripts'));
         this.#modalContent = this.getAttribute('inner-content') || '';
         this.#lazyRenderTemplate = this.querySelector('& > template') || null;
         this.popover ||= '';
