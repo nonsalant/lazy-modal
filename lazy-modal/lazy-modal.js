@@ -11,6 +11,8 @@ class LazyModal extends HTMLElement {
     static #closeButtonPath = 'close-button.html';
     // fetching from path is skipped if the #modalCss array is set    
     static #modalCssPaths = ['lazy-modal.css', 'aria-busy.css'];
+    
+    static #basePath = import.meta.resolve('./');
 
     #host; #triggers; #assetHost; #styles; #scripts;
     #abortController; #abortSignal; #loadOn; #triggerObserver;
@@ -184,7 +186,7 @@ class LazyModal extends HTMLElement {
      * @private
      */
     async #addResource(path, { tagName, attributes, urlAttribute = 'src' }) {
-        const fullPath = isRemoteUrl(path) ? path : `${LazyModal.#basePath}/${path}`;
+        const fullPath = isRemoteUrl(path) ? path : `${LazyModal.#basePath}${path}`;
         // If adding to document.head, check if already exists
         if (this.#assetHost === document.head) {
             const resourceKey = `${tagName}:${fullPath}`;
@@ -200,7 +202,7 @@ class LazyModal extends HTMLElement {
             // Set the href or src attribute
             element[urlAttribute] = isRemoteUrl(path)
                 ? path
-                : `${LazyModal.#basePath}/${path}`;
+                : `${LazyModal.#basePath}${path}`;
             element.onload = () => resolve();
             element.onerror = (error) => {
                 console.warn(`lazy-modal.js failed to load resource: ${path}`, error);
@@ -209,16 +211,6 @@ class LazyModal extends HTMLElement {
             this.#assetHost.appendChild(element);
         });
     }
-
-
-    // Static block to set the base path
-    static #basePath;
-    static {
-        const url = new URL(import.meta.url);
-        const moduleUrl = url.pathname;
-        this.#basePath = url.origin + moduleUrl.substring(0, moduleUrl.lastIndexOf('/'));
-    }
-
 
     /* Modal HTML and CSS from external files */
 
@@ -237,7 +229,7 @@ class LazyModal extends HTMLElement {
         // skip fetching if the HTML is set in LazyModal.#closeButton
         if (LazyModal.#closeButton) return LazyModal.#closeButton;
 
-        path = `${LazyModal.#basePath}/${path}`;
+        path = `${LazyModal.#basePath}${path}`;
         try {
             // Check if we already have a promise for this file
             if (!LazyModal.#htmlPromiseCache.has(path)) {
@@ -265,7 +257,7 @@ class LazyModal extends HTMLElement {
 
         const stylesheets = [];
         for (let path of stylesheetPaths) {
-            path = `${LazyModal.#basePath}/${path}`;
+            path = `${LazyModal.#basePath}${path}`;
 
             // Check if we already have a promise for this stylesheet
             if (!LazyModal.#cssPromiseCache.has(path)) {
@@ -293,10 +285,7 @@ class LazyModal extends HTMLElement {
     static #cssPromiseCache = new Map();
 
     static #closeButton = ``; // won't be used if empty
-    static #modalCss = [ // if the first item is empty, the array won't be used
-        ``,
-        `:host { background: red; }`, // Example CSS, replace with actual styles
-    ];
+    static #modalCss = [``, ``]; // if the first item is empty, the array won't be used
 
 }
 

@@ -20,7 +20,7 @@ A popover that starts loading related assets (and, optionally, the content insid
 | `load-on`        | Possible values: <br>• `click` - the modal will load everything when a trigger is clicked. <br>• `hover` (default) - the modal will load everything when a trigger is hovered or focused. <br>• `visible` - the modal will load everything when a trigger becomes visible in the viewport. <br>• `load` - the modal will load everything immediately without looking for a trigger.|
 | `in-head`        | If present, the modal's styles and scripts will be added to the `<head>` of the document instead of inside the modal element. |
 
-## Importing the Component
+## Importing the component from local files
 
 Grab the lazy-modal folder from this repo and include the script:
 ```html
@@ -28,6 +28,11 @@ Grab the lazy-modal folder from this repo and include the script:
 ```
 
 Alternatively, you can grab everything as a single JavaScript file from the [CodePen demo](https://codepen.io/nonsalant/pen/MYwjvoo) (all the code in the JS tab), where utility functions are included at the bottom, and the `#closeButton` and `#modalCss` private properties include all the code from the other asset files in the lazy-modal folder.
+
+## Importing the component from a CDN
+```html
+<script type="module" src="https://unpkg.com/lazy-modal/lazy-modal/lazy-modal.js"></script>
+```
 
 ## Usage
 
