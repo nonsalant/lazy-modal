@@ -1,12 +1,15 @@
 {
   "name": "lazy-modal",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "A popover web component that starts loading related assets when you hover or focus its trigger button(s)",
-  "main": "lazy-modal/lazy-modal.js",
   "type": "module",
+  "main": "lazy-modal.js",
   "files": [
-    "lazy-modal/"
+    "**/*"
   ],
+  "scripts": {
+    "prepublishOnly": "cp ../README.md ./README.md"
+  },
   "keywords": [
     "web-component",
     "popover",

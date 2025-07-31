@@ -7,6 +7,9 @@ import {
 } from './utils.js';
 
 class LazyModal extends HTMLElement {
+    static #closeButton = ``; // won't be used if empty
+    static #modalCss = [``, ``]; // if the first item is empty, the array won't be used
+    
     // fetching from path is skipped if #closeButton is set
     static #closeButtonPath = 'close-button.html';
     // fetching from path is skipped if the #modalCss array is set    
@@ -284,9 +287,20 @@ class LazyModal extends HTMLElement {
     }
     static #cssPromiseCache = new Map();
 
-    static #closeButton = ``; // won't be used if empty
-    static #modalCss = [``, ``]; // if the first item is empty, the array won't be used
-
+    // Define the custom element unless already defined
+    static tag = "lazy-modal";
+    static define(tag = this.tag) {
+        this.tag = tag;
+        const name = customElements.getName(this);
+        if (name) return console.warn(`${this.name} already defined as <${name}>!`);
+        const ce = customElements.get(tag);
+        if (Boolean(ce) && ce !== this) return console.warn(`<${tag}> already defined as ${ce.name}!`);
+        customElements.define(tag, this);
+    }
+    static {
+        const tag = new URL(import.meta.url).searchParams.get("define") || this.tag;
+        if (tag !== "false") this.define(tag);
+    }
 }
 
-customElements.define('lazy-modal', LazyModal);
+// customElements.define('lazy-modal', LazyModal);
