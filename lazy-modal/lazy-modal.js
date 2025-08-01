@@ -287,7 +287,7 @@ export default class LazyModal extends HTMLElement {
     }
     static #cssPromiseCache = new Map();
 
-    // Define the custom element unless already defined
+    // Statically define the element unless ?define=false is set as an URL param
     static tag = "lazy-modal";
     static define(tag = this.tag) {
         this.tag = tag;
