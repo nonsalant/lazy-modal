@@ -6,15 +6,15 @@ import {
     createStylesheet,
 } from './utils.js';
 
-class LazyModal extends HTMLElement {
+export default class LazyModal extends HTMLElement {
     static #closeButton = ``; // won't be used if empty
     static #modalCss = [``, ``]; // if the first item is empty, the array won't be used
-    
+
     // fetching from path is skipped if #closeButton is set
     static #closeButtonPath = 'close-button.html';
     // fetching from path is skipped if the #modalCss array is set    
     static #modalCssPaths = ['lazy-modal.css', 'aria-busy.css'];
-    
+
     static #basePath = import.meta.resolve('./');
 
     #host; #triggers; #assetHost; #styles; #scripts;
