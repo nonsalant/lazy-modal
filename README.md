@@ -31,7 +31,7 @@ Alternatively, you can grab everything as a single JavaScript file from the [Cod
 
 ## Importing the component from a CDN
 ```html
-<script type="module" src="https://unpkg.com/lazy-modal/lazy-modal/lazy-modal.js"></script>
+<script type="module" src="https://unpkg.com/lazy-modal/lazy-modal.js"></script>
 ```
 
 ## Usage
