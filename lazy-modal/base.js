@@ -10,6 +10,7 @@ globalThis._cssLocks ??= new Map(); // Map of assetHost -> Promise (lock)
 export class Base extends HTMLElement {
     static enableShadowRoot = false;
     static styles = [];
+    static baseStyle = '.dom-root { display: contents; }';
 
     // https://hawkticehurst.com/2024/05/bring-your-own-base-class/#:~:text=class%20BaseElement,-extends%20HTMLElement%20%7Bconstructor
     constructor() {
@@ -78,7 +79,7 @@ export class Base extends HTMLElement {
     async renderBefore() { return ''; }
 
     async addCss() {
-        const styles = this.constructor.styles;
+        const styles = [this.constructor.baseStyle, ...this.constructor.styles];
         const cssTexts = await this.css(styles);
 
         // for (const cssText of cssTexts) {

@@ -6,10 +6,10 @@ import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } f
 export default class LazyModal extends Base {
     static enableShadowRoot = true;
     static styles = [
-        'lazy-modal.css',
-        'aria-busy.css',
+        'lazy-modal.css', 'aria-busy.css',
         // `h1 { text-decoration: underline; }`,
     ];
+    // static baseStyle = '';
 
     #host; #triggers; #assetHost; #styles; #scripts;
     #abortController; #abortSignal; #loadOn; #triggerObserver;
