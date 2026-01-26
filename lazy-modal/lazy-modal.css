@@ -30,6 +30,10 @@ lazy-modal, :host {
         }
     }
 
+    .dom-root {
+        display: contents;
+    }
+
     header {
         position: sticky;
         top: 0;

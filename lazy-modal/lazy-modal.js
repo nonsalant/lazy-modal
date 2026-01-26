@@ -1,10 +1,11 @@
-import { defineElement, processPlaceholders, executeScripts } from './base-utils.js';
 const COMPONENT_PATH = import.meta.resolve('./');
 const { Base, getHtml } = await import(`./base.js?path=${encodeURIComponent(COMPONENT_PATH)}`);
+import { defineElement, processPlaceholders, executeScripts } from './base-utils.js';
 
 import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './utils.js';
 
 export default class LazyModal extends Base {
+    static enableShadowRoot = true;
     static styles = [
         'lazy-modal.css',
         'aria-busy.css',
@@ -34,6 +35,11 @@ export default class LazyModal extends Base {
         this.#modalContent = this.getAttribute('inner-content') || '';
         this.#lazyRenderTemplate = this.querySelector('& > template') || null;
         this.popover ||= '';
+
+        if (this.constructor.enableShadowRoot) {
+            this.domRoot.insertAdjacentHTML('beforeend', '<slot></slot>');
+            // console.log(this.domRoot);
+        }
     }
 
     connected() {
@@ -131,6 +137,11 @@ export default class LazyModal extends Base {
         const closeButton = await getHtml('close-button.html');
 
         return `${closeButton}`;
+    }
+
+    afterRender() {
+        // Called after the modal is rendered
+        this.domRoot.querySelector('.close-button').addEventListener('click', () => this.hidePopover());
     }
 
     /** 
