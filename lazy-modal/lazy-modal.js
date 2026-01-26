@@ -1,10 +1,4 @@
-import {
-    csvToArray,
-    isRemoteUrl,
-    observeIntersection,
-    unobserveIntersection,
-    // createStylesheet,
-} from './utils.js';
+import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './utils.js';
 
 import { defineElement, processPlaceholders, executeScripts, } from './base-utils.js';
 
