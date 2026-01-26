@@ -1,6 +1,6 @@
 import { defineElement, processPlaceholders, executeScripts } from './base-utils.js';
 const COMPONENT_PATH = import.meta.resolve('./');
-const { Base, getHtml, } = await import(`./base.js?path=${encodeURIComponent(COMPONENT_PATH)}`);
+const { Base, getHtml } = await import(`./base.js?path=${encodeURIComponent(COMPONENT_PATH)}`);
 
 import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './utils.js';
 
