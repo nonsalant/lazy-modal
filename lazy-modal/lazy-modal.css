@@ -1,5 +1,5 @@
 lazy-modal, :host {
-
+    /* ! bug with scoped stylesheets when added to main light DOM */
     /* Renaming this file to lazy-modal.scoped.css will wrap all contents in either 
     ${tagName} { ... } or :host { ... } depending on the presence of a shadow root. */
 

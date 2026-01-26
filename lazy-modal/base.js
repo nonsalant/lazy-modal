@@ -115,6 +115,7 @@ export class Base extends HTMLElement {
                 const filename = styles[index];
                 index++;
                 // if filename ends in .scoped.css
+                // ! bug with scoped stylesheets when added to main light DOM
                 let processedCssText = processPlaceholders(cssText, this);
                 // Scoped stylesheet handling
                 if (filename.endsWith('.scoped.css')) {
