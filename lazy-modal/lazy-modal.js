@@ -1,9 +1,8 @@
-import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './utils.js';
-
-import { defineElement, processPlaceholders, executeScripts, } from './base-utils.js';
-
+import { defineElement, processPlaceholders, executeScripts } from './base-utils.js';
 const COMPONENT_PATH = import.meta.resolve('./');
 const { Base, getHtml, } = await import(`./base.js?path=${encodeURIComponent(COMPONENT_PATH)}`);
+
+import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './utils.js';
 
 export default class LazyModal extends Base {
     static styles = [
