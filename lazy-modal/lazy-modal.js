@@ -3,19 +3,20 @@ import {
     isRemoteUrl,
     observeIntersection,
     unobserveIntersection,
-    createStylesheet,
+    // createStylesheet,
 } from './utils.js';
 
-export default class LazyModal extends HTMLElement {
-    static #closeButton = ``; // won't be used if empty
-    static #modalCss = [``, ``]; // if the first item is empty, the array won't be used
+import { defineElement, processPlaceholders, executeScripts, } from './base-utils.js';
 
-    // fetching from path is skipped if #closeButton is set
-    static #closeButtonPath = 'close-button.html';
-    // fetching from path is skipped if the #modalCss array is set    
-    static #modalCssPaths = ['lazy-modal.css', 'aria-busy.css'];
+const COMPONENT_PATH = import.meta.resolve('./');
+const { Base, getHtml, } = await import(`./base.js?path=${encodeURIComponent(COMPONENT_PATH)}`);
 
-    static #basePath = import.meta.resolve('./');
+export default class LazyModal extends Base {
+    static styles = [
+        'lazy-modal.css',
+        'aria-busy.css',
+        // `h1 { text-decoration: underline; }`,
+    ];
 
     #host; #triggers; #assetHost; #styles; #scripts;
     #abortController; #abortSignal; #loadOn; #triggerObserver;
@@ -30,10 +31,10 @@ export default class LazyModal extends HTMLElement {
         this.#abortSignal = { signal: this.#abortController.signal };
 
         const supportedLoadOnValues = ['click', 'hover', 'visible', 'load'];
-        this.#loadOn = supportedLoadOnValues.includes(this.getAttribute('load-on')) 
-            ? this.getAttribute('load-on') 
+        this.#loadOn = supportedLoadOnValues.includes(this.getAttribute('load-on'))
+            ? this.getAttribute('load-on')
             : 'hover';
-        
+
         this.#assetHost = this.hasAttribute('in-head') ? document.head : this;
         this.#styles = csvToArray(this.getAttribute('inner-styles'));
         this.#scripts = csvToArray(this.getAttribute('inner-scripts'));
@@ -41,21 +42,24 @@ export default class LazyModal extends HTMLElement {
         this.#lazyRenderTemplate = this.querySelector('& > template') || null;
         this.popover ||= '';
     }
-    
-    connectedCallback() {
-        this.#setupModalUi(); // Modal HTML and CSS
+
+    connected() {
+        if (!this.#lazyRenderTemplate && !this.#modalContent) {
+            // 📡 Dispatch a custom event
+            this.dispatchContentLoadedEvent();
+        }
         this.#setupAssetLoading(); // Assets for what's inside the modal
         this.#setupTriggerBehavior();
     }
-    
-    disconnectedCallback() {
+
+    disconnected() {
         if (!this.#triggers.length) return;
         this.#abortController.abort(); // Removes all listeners at once
         if (this.#loadOn === 'visible') this.#triggers.forEach(trigger => {
             unobserveIntersection(this.#triggerObserver, trigger);
         });
     }
-    
+
     #setupTriggerBehavior() {
         if (this.#loadOn === 'load') this.loadAssets(); // Load assets immediately if 'load' is set
 
@@ -86,6 +90,10 @@ export default class LazyModal extends HTMLElement {
         catch (error) { console.error('Failed to handle click:', error); }
         finally {
             trigger.ariaBusy = null;
+            // document.querySelector('#location-wrapper')?.hidePopover();
+            // if (trigger.classList.contains('map-trigger')) {
+            // document.querySelector('#location-wrapper')?.hidePopover();
+            // }
         }
     }
 
@@ -119,7 +127,17 @@ export default class LazyModal extends HTMLElement {
             // If a template is provided, clone its content and append it
             const content = this.#lazyRenderTemplate.content.cloneNode(true);
             this.appendChild(content);
+            if (!this.#modalContent) {
+                // 📡 Dispatch a custom event
+                this.dispatchContentLoadedEvent();
+            }
         }
+    }
+
+    async renderBefore() {
+        const closeButton = await getHtml('close-button.html');
+
+        return `${closeButton}`;
     }
 
     /** 
@@ -131,31 +149,17 @@ export default class LazyModal extends HTMLElement {
     */
     async addContent(htmlPath) {
         if (!htmlPath) return; // No content to add
-        const content = await LazyModal.#html(htmlPath);
-        this.insertAdjacentHTML('beforeend', content);
-        this.#executeScripts(); // Execute any scripts in the injected content
+        const content = await getHtml(htmlPath);
+        const processedContent = processPlaceholders(content, this);
+        // this.appendChild(createFragment(processedContent)); // registers custom elements too early
+        this.insertAdjacentHTML('beforeend', processedContent); // note: this doesn't execute scripts
+        executeScripts(this);
+        // 📡 Dispatch a custom event
+        this.dispatchContentLoadedEvent();
     }
 
-    /**
-     * Execute any scripts found in the component's innerHTML
-     * This is needed because scripts injected via innerHTML don't execute automatically
-     * @private
-     */
-    #executeScripts(context = this) {
-        context.querySelectorAll('script').forEach(oldScript => {
-            const newScript = document.createElement('script');
-
-            // Copy all attributes
-            Array.from(oldScript.attributes).forEach(attr => {
-                newScript.setAttribute(attr.name, attr.value);
-            });
-
-            // Copy the script content
-            newScript.textContent = oldScript.textContent;
-
-            // Replace the old script with the new one
-            oldScript.parentNode.replaceChild(newScript, oldScript);
-        });
+    dispatchContentLoadedEvent() {
+        this.dispatchEvent(new Event('lazy-modal-content-loaded', { bubbles: true, composed: true }));
     }
 
     /**
@@ -188,8 +192,9 @@ export default class LazyModal extends HTMLElement {
      * @returns {Promise<void>} Resolves when the resource is loaded
      * @private
      */
-    async #addResource(path, { tagName, attributes, urlAttribute = 'src' }) {
-        const fullPath = isRemoteUrl(path) ? path : `${LazyModal.#basePath}${path}`;
+    async #addResource(file, { tagName, attributes, urlAttribute = 'src' }) {
+        const path = COMPONENT_PATH;
+        const fullPath = isRemoteUrl(file) ? file : `${path}${file}`;
         // If adding to document.head, check if already exists
         if (this.#assetHost === document.head) {
             const resourceKey = `${tagName}:${fullPath}`;
@@ -203,103 +208,23 @@ export default class LazyModal extends HTMLElement {
             const element = document.createElement(tagName);
             Object.assign(element, attributes);
             // Set the href or src attribute
-            element[urlAttribute] = isRemoteUrl(path)
-                ? path
-                : `${LazyModal.#basePath}${path}`;
+            element[urlAttribute] = isRemoteUrl(file)
+                ? file
+                : `${path}${file}`;
             element.onload = () => resolve();
             element.onerror = (error) => {
-                console.warn(`lazy-modal.js failed to load resource: ${path}`, error);
+                console.warn(`lazy-modal.js failed to load resource: ${file}`, error);
                 resolve(); // Still resolve to not block other resources
             };
             this.#assetHost.appendChild(element);
         });
     }
 
-    /* Modal HTML and CSS from external files */
 
-    async #setupModalUi() {
-        const stylesheets = await LazyModal.#css(...LazyModal.#modalCssPaths);
-        this.#host.adoptedStyleSheets.push(...stylesheets); // CSS for the modal
-
-        if (this.hasAttribute('close-button')) { // Close button is optional
-            const closeButtonHtml = await LazyModal.#html(LazyModal.#closeButtonPath);
-            this.insertAdjacentHTML('afterbegin', closeButtonHtml);
-        }
-    }
-
-    // Load and statically cache HTML
-    static async #html(path) {
-        // skip fetching if the HTML is set in LazyModal.#closeButton
-        if (LazyModal.#closeButton) return LazyModal.#closeButton;
-
-        path = `${LazyModal.#basePath}${path}`;
-        try {
-            // Check if we already have a promise for this file
-            if (!LazyModal.#htmlPromiseCache.has(path)) {
-                // Create and cache the fetch promise
-                const fetchPromise = fetch(path).then(response => {
-                    if (!response.ok) throw new Error(`Failed to fetch html: ${path}`);
-                    return response.text()
-                });
-                LazyModal.#htmlPromiseCache.set(path, fetchPromise);
-            }
-            // Await the cached promise
-            const html = await LazyModal.#htmlPromiseCache.get(path);
-            return html ?? '';
-        } catch (error) { console.error('Failed to load html:', error); }
-    }
-    static #htmlPromiseCache = new Map();
-
-    // Load modal CSS files and cache the stylesheets statically
-    static async #css(...stylesheetPaths) {
-        // skip fetching if CSS is set in the LazyModal.#modalCss array
-        if (LazyModal.#modalCss[0]) {
-            const promises = LazyModal.#modalCss.map(cssText => createStylesheet(cssText));
-            return await Promise.all(promises); // Return an array of stylesheets
-        }
-
-        const stylesheets = [];
-        for (let path of stylesheetPaths) {
-            path = `${LazyModal.#basePath}${path}`;
-
-            // Check if we already have a promise for this stylesheet
-            if (!LazyModal.#cssPromiseCache.has(path)) {
-                // Create and cache the complete stylesheet creation promise
-                const stylesheetPromise = fetch(path)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`Failed to fetch stylesheet: ${path}`);
-                        return response.text();
-                    })
-                    .then(async (cssText) => { return await createStylesheet(cssText); })
-                    .catch(error => {
-                        console.error(`Error loading stylesheet ${path}:`, error);
-                        return new CSSStyleSheet(); // Return empty stylesheet as fallback
-                    });
-
-                LazyModal.#cssPromiseCache.set(path, stylesheetPromise);
-            }
-
-            // Await the cached promise
-            const stylesheet = await LazyModal.#cssPromiseCache.get(path);
-            stylesheets.push(stylesheet);
-        }
-        return stylesheets;
-    }
-    static #cssPromiseCache = new Map();
-
-    // Statically define the element unless ?define=false is set as an URL param
-    static tag = "lazy-modal";
-    static define(tag = this.tag) {
-        this.tag = tag;
-        const name = customElements.getName(this);
-        if (name) return console.warn(`${this.name} already defined as <${name}>!`);
-        const ce = customElements.get(tag);
-        if (Boolean(ce) && ce !== this) return console.warn(`<${tag}> already defined as ${ce.name}!`);
-        customElements.define(tag, this);
-    }
+    // Statically define (or rename) the element unless ?define=false is set in the URL
     static {
-        const tag = new URL(import.meta.url).searchParams.get("define") || this.tag;
-        if (tag !== "false") this.define(tag);
+        const tag = new URL(import.meta.url).searchParams.get('define');
+        defineElement(tag, this);
     }
 }
 

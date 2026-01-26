@@ -115,7 +115,6 @@ export class Base extends HTMLElement {
                 index++;
                 // if filename ends in .scoped.css
                 let processedCssText = processPlaceholders(cssText, this);
-                // let processedCssText = cssText;
                 // Scoped stylesheet handling
                 if (filename.endsWith('.scoped.css')) {
                     if (this.shadowRoot) {
@@ -125,8 +124,6 @@ export class Base extends HTMLElement {
                         // Scoped to tag name: wrap in tag selector
                         processedCssText = `${tagName} { ${processedCssText} }`;
                     }
-                    // processedCssText =  `:where(${filename}, :host) { ${processedCssText}}`;
-                    // console.log(processedCssText);
                 }
                 const stylesheet = await createStylesheet(processedCssText);
                 this.assetHost.adoptedStyleSheets?.push(stylesheet);
