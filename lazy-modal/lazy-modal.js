@@ -37,7 +37,6 @@ export default class LazyModal extends Base {
 
         if (this.constructor.enableShadowRoot) {
             this.domRoot.insertAdjacentHTML('beforeend', '<slot></slot>');
-            // console.log(this.domRoot);
         }
     }
 
