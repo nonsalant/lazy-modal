@@ -46,6 +46,7 @@ export class Base extends HTMLElement {
 
     moveLightDomToDomRoot(processContent = false) {
         if (processContent) {
+            // note: scripts won't execute, listeners are lost
             const processedHtml = processPlaceholders(this.innerHTML, this);
             this.domRoot.insertAdjacentHTML('beforeend', processedHtml);
             this.innerHTML = ''; // clear light DOM content
