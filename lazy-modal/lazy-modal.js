@@ -4,7 +4,7 @@ import { defineElement, processPlaceholders, executeScripts } from './base-utils
 import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './utils.js';
 
 export default class LazyModal extends Base {
-    // static enableShadowRoot = true;
+    static enableShadowRoot = true;
     static styles = [
         'lazy-modal.scoped.css',
         // 'lazy-modal.css',

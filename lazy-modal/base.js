@@ -27,19 +27,22 @@ export class Base extends HTMLElement {
         this.assetHost = this.shadowRoot ?? this.getRootNode();
         // console.log(this.constructor.name, this.assetHost);
 
+        // Setup domRoot
         if (this.shadowRoot) {
             this.domRoot = this.shadowRoot.firstElementChild;
-            this.domRoot.insertAdjacentHTML('beforeend', this.innerHTML);
+            // if no slots are initially present, move light DOM content into domRoot
+            const noSlots = this.querySelector('[slot]') === null;
+            if (noSlots) {
+                this.domRoot.insertAdjacentHTML('beforeend', this.innerHTML);
+                this.innerHTML = ''; // clear light DOM content
+            }
         } else this.domRoot = this;
 
-        // Use a string key for the Map instead of the object reference
+        // Setup assetHostKey for tracking added stylesheets
         const assetHostKey = this.assetHost === document ? 'document' : this.assetHost;
-        // Initialize Set for this assetHost if not present
+        // Initialize Set for this assetHost if not present, otherwise use existing _addedStylesheets.get(assetHostKey)
         if (!globalThis._addedStylesheets.has(assetHostKey)) {
-            // console.log('Creating new Set for:', assetHostKey);
             globalThis._addedStylesheets.set(assetHostKey, new Set());
-        } else {
-            // console.log('Using existing Set, current size:', globalThis._addedStylesheets.get(assetHostKey).size);
         }
         this._assetHostKey = assetHostKey;
     }
