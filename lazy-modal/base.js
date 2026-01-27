@@ -125,10 +125,8 @@ export class Base extends HTMLElement {
                     } else {
                         // Scoped to tag name: wrap in tag selector
                         processedCssText = `${tagName} { ${processedCssText} }`;
-                        console.log(filename, processedCssText)
                     }
                 }
-                console.log(processedCssText);
                 const stylesheet = await createStylesheet(processedCssText);
                 this.assetHost.adoptedStyleSheets?.push(stylesheet);
 
