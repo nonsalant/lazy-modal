@@ -27,15 +27,12 @@ export class Base extends HTMLElement {
         this.assetHost = this.shadowRoot ?? this.getRootNode();
         // console.log(this.constructor.name, this.assetHost);
 
-        // Setup domRoot
+        // Setup domRoot to the shadow root's first element child or 'this'
         if (this.shadowRoot) {
             this.domRoot = this.shadowRoot.firstElementChild;
-            // if no slots are initially present, move light DOM content into domRoot
+            // 🚧 if no slots are initially present, move content into domRoot
             const noSlots = this.querySelector('[slot]') === null;
-            if (noSlots) {
-                this.domRoot.insertAdjacentHTML('beforeend', this.innerHTML);
-                this.innerHTML = ''; // clear light DOM content
-            }
+            if (noSlots) this.moveLightDomToDomRoot();
         } else this.domRoot = this;
 
         // Setup assetHostKey for tracking added stylesheets
@@ -45,6 +42,17 @@ export class Base extends HTMLElement {
             globalThis._addedStylesheets.set(assetHostKey, new Set());
         }
         this._assetHostKey = assetHostKey;
+    }
+
+    moveLightDomToDomRoot(processContent = false) {
+        if (processContent) {
+            const processedHtml = processPlaceholders(this.innerHTML, this);
+            this.domRoot.insertAdjacentHTML('beforeend', processedHtml);
+            this.innerHTML = ''; // clear light DOM content
+            return;
+        }
+         
+        while (this.firstChild) this.domRoot.appendChild(this.firstChild);
     }
 
     disconnectedCallback() { this.disconnected(); }
