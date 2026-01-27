@@ -4,9 +4,11 @@ import { defineElement, processPlaceholders, executeScripts } from './base-utils
 import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './utils.js';
 
 export default class LazyModal extends Base {
-    static enableShadowRoot = true;
+    // static enableShadowRoot = true;
     static styles = [
-        'lazy-modal.css', 'aria-busy.css',
+        'lazy-modal.scoped.css',
+        // 'lazy-modal.css',
+        'aria-busy.css',
         // `h1 { text-decoration: underline; }`,
     ];
     // static baseStyle = '';
