@@ -165,7 +165,8 @@ export default class LazyModal extends Base {
         const processedContent = processPlaceholders(content, this);
         // this.domRoot.appendChild(createFragment(processedContent)); // registers custom elements too early
         this.domRoot.insertAdjacentHTML('beforeend', processedContent); // note: this doesn't execute scripts
-        executeScripts(this);
+        // executeScripts(this);
+        executeScripts(this.domRoot);
         // 📡 Dispatch a custom event
         this.dispatchContentLoadedEvent();
     }

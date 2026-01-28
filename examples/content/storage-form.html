@@ -59,23 +59,27 @@
 <script type="module">
     console.log("storage-form demo loaded");
     const updatePage = () => {
-        document.querySelector("output").innerHTML = JSON.stringify(
-            window.localStorage
-        );
+        const output = document.querySelector("output") ?? document.querySelector("lazy-modal").shadowRoot.querySelector("output");
+        output.innerHTML = JSON.stringify(window.localStorage);
     };
     window.addEventListener("storage", updatePage);
     updatePage();
 </script>
 <style>
+    :host,
     :root {
         color-scheme: light dark;
     }
+    /* Note: Safari doesn't support :host:has() yet (as of Jan 2026) */
+    :host:has([value="dark"]:checked),
     :root:has([value="dark"]:checked) {
         color-scheme: dark;
     }
+    :host:has([value="light"]:checked),
     :root:has([value="light"]:checked) {
         color-scheme: light;
     }
+    :host:has([name="contrast"]:checked),
     :root:has([name="contrast"]:checked) {
         font-weight: bold;
     }
