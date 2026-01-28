@@ -26,7 +26,6 @@
     <!-- storage form demo from: https://github.com/daviddarnes/storage-form -->
     <lazy-modal popover
         triggers=".storage-trigger"
-        close-button 
         inner-scripts="https://www.unpkg.com/@daviddarnes/storage-form@2.0.1/storage-form.js"
     >
         <?php include 'content/storage-form.html'; ?>
@@ -35,7 +34,6 @@
     <!-- action table demo from: https://github.com/colinaut/action-table -->
     <lazy-modal popover
         triggers=".table-trigger"
-        close-button 
         inner-styles="https://unpkg.com/@colinaut/action-table/dist/action-table.css" 
         inner-scripts="https://unpkg.com/@colinaut/action-table/dist/index.js, 
             https://unpkg.com/@colinaut/action-table/dist/action-table-switch.js"

@@ -40,6 +40,11 @@ export default class LazyModal extends Base {
         if (this.constructor.enableShadowRoot) {
             this.domRoot.insertAdjacentHTML('beforeend', '<slot></slot>');
         }
+        
+        const closeButtonAttr = this.getAttribute('close-button');
+        this.closeButton = closeButtonAttr === 'false' 
+            ? false 
+            : (closeButtonAttr !== 'true' && closeButtonAttr) || 'close-button.html';
     }
 
     connected() {
@@ -134,14 +139,13 @@ export default class LazyModal extends Base {
     }
 
     async renderBefore() {
-        const closeButton = await getHtml('close-button.html');
-
+        const closeButton = this.closeButton ? await getHtml(this.closeButton) : '';
         return `${closeButton}`;
     }
 
     afterRender() {
         // Called after the modal is rendered
-        this.domRoot.querySelector('.close-button').addEventListener('click', () => this.hidePopover());
+        this.domRoot.querySelector('.close-button')?.addEventListener('click', () => this.hidePopover());
     }
 
     /** 
