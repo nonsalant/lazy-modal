@@ -30,44 +30,21 @@
         }
     }
 
-    /* .dom-root { display: contents; } */
-
     header {
         position: sticky;
         top: 0;
         z-index: 500;
     }
 
-    h1, h2, h3, h4, h5, h6 {
-        margin-block: 0;
-    }
-
     .close-button {
-        appearance: none;
         /* position: absolute; */
         /* inset: .25lh .25lh auto auto; */
         float: right;
-        width: 1.75lh;
-        aspect-ratio: 1;
-        display: grid;
-        place-items: center;
-        padding: 0;
-        border-radius: 50%;
-        border: none;
-        cursor: pointer;
         margin-block-start: -1lh;
         margin-inline-end: -1lh;
-        color: inherit;
-        &:not(:hover) {
-            background: transparent;
-        }
-        &:active {
-            /* background: #f0f0f0; */
-            scale: .9;
-            transform-origin: center;
-        }
-        & svg {
-            width: 1lh; height: 1lh;
-        }
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        margin-block: 0;
     }
 

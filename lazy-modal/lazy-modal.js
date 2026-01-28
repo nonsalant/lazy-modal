@@ -9,6 +9,7 @@ export default class LazyModal extends Base {
         'lazy-modal.scoped.css',
         // 'lazy-modal.css',
         'aria-busy.css',
+        'close-button.css',
         // `h1 { text-decoration: underline; }`,
     ];
     // static baseStyle = '';
