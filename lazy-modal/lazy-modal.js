@@ -4,15 +4,17 @@ import { defineElement, processPlaceholders, executeScripts } from './lib/base/b
 import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './lib/lazy-modal-utils.js';
 
 export default class LazyModal extends Base {
-    // static enableShadowRoot = true;
+    static enableShadowRoot = true;
     static styles = [
-        'lazy-modal.scoped.css',
+        // `h1 { text-decoration: underline; }`,
         // 'lazy-modal.css',
+        'lazy-modal.scoped.css',
         'elements/aria-busy.css',
         'elements/close-button.css',
-        // `h1 { text-decoration: underline; }`,
     ];
-    // static baseStyle = '';
+    static globalStyles = [
+        'elements/aria-busy.css',
+    ]
 
     #host; #triggers; #assetHost; #styles; #scripts;
     #abortController; #abortSignal; #loadOn; #triggerObserver;

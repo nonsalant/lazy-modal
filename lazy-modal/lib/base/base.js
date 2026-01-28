@@ -3,7 +3,7 @@ import { createStylesheet, looksLikeCssText, processPlaceholders, executeScripts
 // Get the component path from the URL query parameter
 const COMPONENT_PATH = new URL(import.meta.url).searchParams.get('path');
 
-// Track added stylesheets globally to prevent duplicates across all component instances
+// Track added stylesheets to prevent duplicates across all component instances
 globalThis._addedStylesheets ??= new Map(); // Map of assetHost -> Set of CSS texts
 globalThis._cssLocks ??= new Map(); // Map of assetHost -> Promise (lock)
 
@@ -11,6 +11,8 @@ export class Base extends HTMLElement {
     static enableShadowRoot = false;
     static styles = [];
     static baseStyle = '.dom-root { display: contents; }';
+    static globalStyles = [];
+    static globalBaseStyle = '';
 
     // https://hawkticehurst.com/2024/05/bring-your-own-base-class/#:~:text=class%20BaseElement,-extends%20HTMLElement%20%7Bconstructor
     constructor() {
@@ -67,6 +69,7 @@ export class Base extends HTMLElement {
 
     async init() {
         await this.addCss();
+        await this.addGlobalCss();
 
         const markup = await this.render();
         const beforeMarkup = await this.renderBefore();
@@ -89,6 +92,38 @@ export class Base extends HTMLElement {
     async afterRender() { }
     async render() { return ''; }
     async renderBefore() { return ''; }
+
+    async addGlobalCss() {
+        const styles = [...this.constructor.globalStyles, this.constructor.globalBaseStyle];
+        const cssTexts = await this.css(styles);
+
+        // Wait for any pending CSS additions for this assetHost
+        while (globalThis._cssLocks.get('document')) {
+            await globalThis._cssLocks.get('document');
+        }
+
+        let releaseLock;
+        const lockPromise = new Promise(resolve => { releaseLock = resolve; });
+        globalThis._cssLocks.set('document', lockPromise);
+        try {
+            const addedStylesheets = globalThis._addedStylesheets.get('document');
+            if (!addedStylesheets) {
+                globalThis._addedStylesheets.set('document', new Set());
+            }
+            const stylesheetSet = globalThis._addedStylesheets.get('document');
+
+            for (const cssText of cssTexts) {
+                if (stylesheetSet.has(cssText)) continue;
+                const processedCssText = processPlaceholders(cssText, this);
+                const stylesheet = await createStylesheet(processedCssText);
+                document.adoptedStyleSheets?.push(stylesheet);
+                stylesheetSet.add(cssText);
+            }
+        } finally {
+            globalThis._cssLocks.delete('document');
+            releaseLock();
+        }
+    }
 
     async addCss() {
         const styles = [...this.constructor.styles, this.constructor.baseStyle];
@@ -159,6 +194,7 @@ export class Base extends HTMLElement {
         if (Array.isArray(styles)) {
             // add COMPONENT_PATH to each path if it doesn't look like raw CSS
             styles = styles.map(str => {
+                if (str === '') return; // skip empty strings
                 if (typeof str !== 'string') return console.warn('Base.css: style entry is not a string:', str);
                 // Heuristic: whitespace in a non-URL likely means CSS text
                 if (looksLikeCssText(str)) return str; // raw css text, don't resolve as URL
