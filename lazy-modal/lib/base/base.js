@@ -32,9 +32,9 @@ export class Base extends HTMLElement {
         // Setup domRoot to the shadow root's first element child or 'this'
         if (this.shadowRoot) {
             this.domRoot = this.shadowRoot.firstElementChild;
-            // 🚧 if no slots are initially present, move content into domRoot
-            const noSlots = this.querySelector('[slot]') === null;
-            if (noSlots) this.moveLightDomToDomRoot();
+            // // 🚧 if no slots are initially present, move content into domRoot
+            // const noSlots = this.querySelector('[slot]') === null;
+            // if (noSlots) this.moveLightDomToDomRoot();
         } else this.domRoot = this;
 
         // Setup assetHostKey for tracking added stylesheets

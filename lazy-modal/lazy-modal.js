@@ -39,7 +39,7 @@ export default class LazyModal extends Base {
             ? this.getAttribute('load-on')
             : 'hover';
 
-        this.#assetHost = this.hasAttribute('in-head') ? document.head : this;
+        this.#assetHost = this.hasAttribute('in-head') ? document.head : this.domRoot;
         this.#styles = csvToArray(this.getAttribute('inner-styles'));
         this.#scripts = csvToArray(this.getAttribute('inner-scripts'));
         this.#modalContent = this.getAttribute('inner-content') || '';
@@ -113,8 +113,8 @@ export default class LazyModal extends Base {
             this.#lazyRender(); // Lazy render template if provided
             this.#loadingAssetsPromise = Promise.all([
                 this.addContent(this.#modalContent), // Optionally inject external content
-                ...this.#styles.map(path => this.addStyle(path)),
                 ...this.#scripts.map(path => this.addScript(path)),
+                ...this.#styles.map(path => this.addStyle(path)),
             ]);
             // console.log('LazyModal: Loading assets');
             return this.#loadingAssetsPromise;
@@ -163,8 +163,8 @@ export default class LazyModal extends Base {
         if (!htmlPath) return; // No content to add
         const content = await getHtml(htmlPath);
         const processedContent = processPlaceholders(content, this);
-        // this.appendChild(createFragment(processedContent)); // registers custom elements too early
-        this.insertAdjacentHTML('beforeend', processedContent); // note: this doesn't execute scripts
+        // this.domRoot.appendChild(createFragment(processedContent)); // registers custom elements too early
+        this.domRoot.insertAdjacentHTML('beforeend', processedContent); // note: this doesn't execute scripts
         executeScripts(this);
         // 📡 Dispatch a custom event
         this.dispatchContentLoadedEvent();
@@ -228,7 +228,18 @@ export default class LazyModal extends Base {
                 console.warn(`lazy-modal.js failed to load resource: ${file}`, error);
                 resolve(); // Still resolve to not block other resources
             };
-            this.#assetHost.appendChild(element);
+            if (this.#lazyRenderTemplate) {
+                // this.#assetHost.appendChild(element);
+                this.appendChild(element);
+            }
+            else {
+                // this.domRoot.appendChild(element);
+                if (this.#modalContent) {
+                    this.#assetHost.appendChild(element);
+                } else {
+                    this.appendChild(element);
+                }
+            }
         });
     }
 
