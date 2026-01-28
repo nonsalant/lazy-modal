@@ -172,7 +172,6 @@ export class Base extends HTMLElement {
 
 
 // Utils
-// import { processPlaceholders, getCss, createStylesheet } from './utils.js';
 
 globalThis.htmlPromiseCache ??= new Map();
 globalThis.cssPromiseCache ??= new Map();
