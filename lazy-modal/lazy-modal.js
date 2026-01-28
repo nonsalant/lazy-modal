@@ -20,6 +20,12 @@ export default class LazyModal extends Base {
 
     constructor() {
         super();
+
+        const closeButtonAttr = this.getAttribute('close-button');
+        this.closeButton = closeButtonAttr === 'false'
+            ? false
+            : (closeButtonAttr !== 'true' && closeButtonAttr) || 'close-button.html';
+
         this.#host = this.getRootNode(); // 'document' or a shadow root
 
         this.#triggers = this.#host.querySelectorAll(this.getAttribute('triggers'));
@@ -41,11 +47,6 @@ export default class LazyModal extends Base {
         if (this.constructor.enableShadowRoot) {
             this.domRoot.insertAdjacentHTML('beforeend', '<slot></slot>');
         }
-        
-        const closeButtonAttr = this.getAttribute('close-button');
-        this.closeButton = closeButtonAttr === 'false' 
-            ? false 
-            : (closeButtonAttr !== 'true' && closeButtonAttr) || 'close-button.html';
     }
 
     connected() {
