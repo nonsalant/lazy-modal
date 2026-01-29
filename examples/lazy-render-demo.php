@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lazy Modal Demo</title>
+    <style>
+        /* demo styles */
+        :root { color-scheme: light dark; }
+        [inner-content="../examples/content/action-table.html"] { color-scheme: light; }
+    </style>
     <script type="module" src="../lazy-modal/lazy-modal.js"></script>
 </head>
 <body>
