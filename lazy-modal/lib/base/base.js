@@ -93,98 +93,74 @@ export class Base extends HTMLElement {
     async render() { return ''; }
     async renderBefore() { return ''; }
 
-    async addGlobalCss() {
-        const styles = [...this.constructor.globalStyles, this.constructor.globalBaseStyle];
-        const cssTexts = await this.css(styles);
-
-        // Wait for any pending CSS additions for this assetHost
-        while (globalThis._cssLocks.get('document')) {
-            await globalThis._cssLocks.get('document');
-        }
-
-        let releaseLock;
-        const lockPromise = new Promise(resolve => { releaseLock = resolve; });
-        globalThis._cssLocks.set('document', lockPromise);
-        try {
-            const addedStylesheets = globalThis._addedStylesheets.get('document');
-            if (!addedStylesheets) {
-                globalThis._addedStylesheets.set('document', new Set());
-            }
-            const stylesheetSet = globalThis._addedStylesheets.get('document');
-
-            for (const cssText of cssTexts) {
-                if (stylesheetSet.has(cssText)) continue;
-                const processedCssText = processPlaceholders(cssText, this);
-                const stylesheet = await createStylesheet(processedCssText);
-                document.adoptedStyleSheets?.push(stylesheet);
-                stylesheetSet.add(cssText);
-            }
-        } finally {
-            globalThis._cssLocks.delete('document');
-            releaseLock();
-        }
-    }
-
-    async addCss() {
-        const styles = [...this.constructor.styles, this.constructor.baseStyle];
-        const cssTexts = await this.css(styles);
+    async _addStylesheetsWithLock(assetHostKey, target, cssTexts, scoper = null) {
 
         // for (const cssText of cssTexts) {
         //     const processedCssText = processPlaceholders(cssText, this);
         //     const stylesheet = await createStylesheet(processedCssText);
         //     this.assetHost.adoptedStyleSheets?.push(stylesheet);
         // }
-
+        
         // Wait for any pending CSS additions for this assetHost
-        while (globalThis._cssLocks.get(this._assetHostKey)) {
-            await globalThis._cssLocks.get(this._assetHostKey);
+        while (globalThis._cssLocks.get(assetHostKey)) {
+            await globalThis._cssLocks.get(assetHostKey);
         }
 
         // Create a lock promise
         let releaseLock;
         const lockPromise = new Promise(resolve => { releaseLock = resolve; });
-        globalThis._cssLocks.set(this._assetHostKey, lockPromise);
+        globalThis._cssLocks.set(assetHostKey, lockPromise);
 
         try {
-            const addedStylesheets = globalThis._addedStylesheets.get(this._assetHostKey);
-            // console.log('addCss:', this.constructor.name, 'Set size:', addedStylesheets.size);
-            let index = 0;
-
+            // Ensure the Set exists for this assetHostKey
+            if (!globalThis._addedStylesheets.has(assetHostKey)) {
+                globalThis._addedStylesheets.set(assetHostKey, new Set());
+            }
+            const stylesheetSet = globalThis._addedStylesheets.get(assetHostKey);
+            
             for (const cssText of cssTexts) {
-                // Check if this CSS source is already applied BEFORE processing
-                if (addedStylesheets.has(cssText)) {
-                    // console.log('✓ Stylesheet already added, skipping duplicate.');
-                    continue;
-                }
+                if (stylesheetSet.has(cssText)) continue;
 
-                // console.log('Adding new stylesheet (first 50 chars):', cssText.substring(0, 50));
-                const tagName = camelToKebab(this.constructor.name);
-                const filename = styles[index];
-                index++;
-                // if filename ends in .scoped.css
-                // !
                 let processedCssText = processPlaceholders(cssText, this);
-                // Scoped stylesheet handling
-                if (filename.endsWith('.scoped.css')) {
-                    if (this.shadowRoot) {
-                        // Scoped to shadow root: wrap in :host
-                        processedCssText = `:host { ${processedCssText} }`;
-                    } else {
-                        // Scoped to tag name: wrap in tag selector
-                        processedCssText = `${tagName} { ${processedCssText} }`;
-                    }
+                if (scoper) {
+                    processedCssText = scoper(processedCssText);
                 }
-                const stylesheet = await createStylesheet(processedCssText);
-                this.assetHost.adoptedStyleSheets?.push(stylesheet);
 
-                // Track the original CSS source, not the processed version
-                addedStylesheets.add(cssText);
+                const stylesheet = await createStylesheet(processedCssText);
+                target.adoptedStyleSheets?.push(stylesheet);
+                stylesheetSet.add(cssText);
             }
         } finally {
-            // Release the lock
-            globalThis._cssLocks.delete(this._assetHostKey);
+            globalThis._cssLocks.delete(assetHostKey);
             releaseLock();
         }
+    }
+
+    async addGlobalCss() {
+        const styles = [...this.constructor.globalStyles, this.constructor.globalBaseStyle];
+        const cssTexts = await this.css(styles);
+        await this._addStylesheetsWithLock('document', document, cssTexts);
+    }
+
+    async addCss() {
+        const styles = [...this.constructor.styles, this.constructor.baseStyle];
+        const cssTexts = await this.css(styles);
+        
+        let index = 0;
+        const scoper = (processedCssText) => {
+            const filename = styles[index++];
+            
+            // Scoped stylesheet handling
+            if (filename?.endsWith('.scoped.css')) {
+                const tagName = camelToKebab(this.constructor.name);
+                return this.shadowRoot 
+                    ? `:host { ${processedCssText} }`
+                    : `${tagName} { ${processedCssText} }`;
+            }
+            return processedCssText;
+        };
+
+        await this._addStylesheetsWithLock(this._assetHostKey, this.assetHost, cssTexts, scoper);
     }
 
     async css(styles) {
