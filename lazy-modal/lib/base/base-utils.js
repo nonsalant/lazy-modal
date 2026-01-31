@@ -182,7 +182,7 @@ export function markScripts(markup) {
  * executeScripts(container); // The script will now execute
  */
 export function executeScripts(context, markedScriptsOnly = true) {
-    const selector = markedScriptsOnly ? 'script[data-not-executed]' : 'script';
+    const selector = 'script' + (markedScriptsOnly ? '[data-not-executed]' : '');
     context.querySelectorAll(selector).forEach(oldScript => {
         oldScript.removeAttribute('data-not-executed');
 
