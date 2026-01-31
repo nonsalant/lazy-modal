@@ -182,20 +182,15 @@ export function markScripts(markup) {
  * executeScripts(container); // The script will now execute
  */
 export function executeScripts(context, markedScriptsOnly = true) {
-    let selector = 'script';
-    if (markedScriptsOnly) {
-        selector = 'script[data-not-executed]';
-    }
+    const selector = markedScriptsOnly ? 'script[data-not-executed]' : 'script';
     context.querySelectorAll(selector).forEach(oldScript => {
         oldScript.removeAttribute('data-not-executed');
 
         const newScript = document.createElement('script');
-
         // Copy all attributes
         Array.from(oldScript.attributes).forEach(attr => {
             newScript.setAttribute(attr.name, attr.value);
         });
-
         // Copy the script content
         newScript.textContent = oldScript.textContent;
 
