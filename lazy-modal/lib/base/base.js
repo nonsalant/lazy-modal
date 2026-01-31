@@ -46,17 +46,16 @@ export class Base extends HTMLElement {
         this._assetHostKey = assetHostKey;
     }
 
-    moveLightDomToDomRoot(processContent = false) {
-        if (processContent) {
-            // note: scripts won't execute, listeners are lost
-            const processedHtml = processPlaceholders(this.innerHTML, this);
-            this.domRoot.insertAdjacentHTML('beforeend', processedHtml);
-            this.innerHTML = ''; // clear light DOM content
-            return;
-        }
-         
-        while (this.firstChild) this.domRoot.appendChild(this.firstChild);
-    }
+    // moveLightDomToDomRoot(processContent = false) {
+    //     if (processContent) {
+    //         // note: scripts won't execute, listeners are lost
+    //         const processedHtml = processPlaceholders(this.innerHTML, this);
+    //         this.domRoot.insertAdjacentHTML('beforeend', processedHtml);
+    //         this.innerHTML = ''; // clear light DOM content
+    //         return;
+    //     }
+    //     while (this.firstChild) this.domRoot.appendChild(this.firstChild);
+    // }
 
     disconnectedCallback() { this.disconnected(); }
 
