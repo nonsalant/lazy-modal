@@ -34,7 +34,7 @@ export class Base extends HTMLElement {
             this.root = this.shadowRoot;
             // // 🚧 if no slots are initially present, move content into domRoot
             // const noSlots = this.querySelector('[slot]') === null;
-            // if (noSlots) this.moveLightDomToDomRoot();
+            // if (noSlots) this.moveLightToShadow();
         } else this.root = this;
 
         // Setup assetHostKey for tracking added stylesheets
@@ -46,16 +46,23 @@ export class Base extends HTMLElement {
         this._assetHostKey = assetHostKey;
     }
 
-    // moveLightDomToDomRoot(processContent = false) {
-    //     if (processContent) {
-    //         // note: scripts won't execute, listeners are lost
-    //         const processedHtml = processPlaceholders(this.innerHTML, this);
-    //         this.domRoot.insertAdjacentHTML('beforeend', processedHtml);
-    //         this.innerHTML = ''; // clear light DOM content
-    //         return;
-    //     }
-    //     while (this.firstChild) this.domRoot.appendChild(this.firstChild);
-    // }
+    moveLightToShadow(processContent = false) {
+        if (processContent) {
+            // note: scripts won't execute, listeners are lost
+            const processedHtml = processPlaceholders(this.innerHTML, this);
+            if (this.root.lastElementChild) {
+                this.root.lastElementChild.insertAdjacentHTML('afterend', processedHtml);
+            } else {
+                this.root.innerHTML += processedHtml;
+            }
+            executeScripts(this.root);
+            this.innerHTML = ''; // clear light DOM content
+            return;
+        }
+        while (this.firstChild) {
+            this.root.appendChild(this.firstChild);
+        }
+    }
 
     disconnectedCallback() { this.disconnected(); }
 

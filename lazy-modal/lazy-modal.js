@@ -4,7 +4,7 @@ import { defineElement, processPlaceholders, executeScripts } from './lib/base/b
 import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './lib/lazy-modal-utils.js';
 
 export default class LazyModal extends Base {
-    // static enableShadowRoot = true;
+    static enableShadowRoot = true;
     static styles = [
         // `h1 { text-decoration: underline; }`,
         // 'lazy-modal.css',
@@ -48,7 +48,10 @@ export default class LazyModal extends Base {
 
         if (this.constructor.enableShadowRoot && !this.shadowRoot.innerHTML) {
             // this.root.lastElementChild.insertAdjacentHTML('afterend', '<slot></slot>');
-            this.shadowRoot.innerHTML = '<slot></slot>';
+            // this.shadowRoot.innerHTML = '<slot></slot>';
+            // const noSlots = this.querySelector('[slot]') === null;
+            // if (noSlots)
+                this.moveLightToShadow();
         }
     }
 
@@ -135,7 +138,7 @@ export default class LazyModal extends Base {
         if (this.#lazyRenderTemplate) {
             // If a template is provided, clone its content and append it
             const content = this.#lazyRenderTemplate.content.cloneNode(true);
-            this.appendChild(content);
+            this.root.appendChild(content);
             if (!this.#modalContent) {
                 // 📡 Dispatch a custom event
                 this.dispatchContentLoadedEvent();
@@ -165,8 +168,9 @@ export default class LazyModal extends Base {
         const content = await getHtml(htmlPath);
         const processedContent = processPlaceholders(content, this);
         // this.root.lastElementChild.after(createFragment(processedContent)); // registers custom elements too early
-        this.root.lastElementChild.insertAdjacentHTML('afterend', processedContent); // note: this doesn't execute scripts
-        // executeScripts(this);
+        if (this.root.lastElementChild) 
+            this.root.lastElementChild.insertAdjacentHTML('afterend', processedContent); // this doesn't execute scripts
+        else this.root.innerHTML += processedContent;
         executeScripts(this.root);
         // 📡 Dispatch a custom event
         this.dispatchContentLoadedEvent();
@@ -231,15 +235,16 @@ export default class LazyModal extends Base {
                 resolve(); // Still resolve to not block other resources
             };
             if (this.#lazyRenderTemplate) {
-                // this.#assetHost.appendChild(element);
-                this.appendChild(element);
+                this.#assetHost.appendChild(element);
+                // this.appendChild(element);
             }
             else {
-                // this.domRoot.appendChild(element);
+                // this.root.appendChild(element);
                 if (this.#modalContent) {
                     this.#assetHost.appendChild(element);
                 } else {
-                    this.appendChild(element);
+                    // this.appendChild(element);
+                    this.root.appendChild(element);
                 }
             }
         });
