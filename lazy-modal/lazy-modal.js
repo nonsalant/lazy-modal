@@ -47,11 +47,7 @@ export default class LazyModal extends Base {
         this.popover ||= '';
 
         if (this.constructor.enableShadowRoot && !this.shadowRoot.innerHTML) {
-            // this.root.lastElementChild.insertAdjacentHTML('afterend', '<slot></slot>');
-            // this.shadowRoot.innerHTML = '<slot></slot>';
-            // const noSlots = this.querySelector('[slot]') === null;
-            // if (noSlots)
-                this.moveLightToShadow();
+            this.moveLightToShadow();
         }
     }
 
@@ -214,7 +210,7 @@ export default class LazyModal extends Base {
         const path = COMPONENT_PATH;
         const fullPath = isRemoteUrl(file) ? file : `${path}${file}`;
         // If adding to document.head, check if already exists
-        if (this.#assetHost === document.head) {
+        if (this.hasAttribute('in-head')) {
             const resourceKey = `${tagName}:${fullPath}`;
             if (LazyModal.#globalResources.has(resourceKey)) {
                 return Promise.resolve(); // Already loaded
@@ -234,19 +230,8 @@ export default class LazyModal extends Base {
                 console.warn(`lazy-modal.js failed to load resource: ${file}`, error);
                 resolve(); // Still resolve to not block other resources
             };
-            if (this.#lazyRenderTemplate) {
-                this.#assetHost.appendChild(element);
-                // this.appendChild(element);
-            }
-            else {
-                // this.root.appendChild(element);
-                if (this.#modalContent) {
-                    this.#assetHost.appendChild(element);
-                } else {
-                    // this.appendChild(element);
-                    this.root.appendChild(element);
-                }
-            }
+
+            this.#assetHost.appendChild(element);
         });
     }
 

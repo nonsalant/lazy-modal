@@ -29,13 +29,9 @@ export class Base extends HTMLElement {
         this.assetHost = this.shadowRoot ?? this.getRootNode();
         // console.log(this.constructor.name, this.assetHost);
 
-        // Setup root to the shadow root child or 'this'
-        if (this.shadowRoot) {
-            this.root = this.shadowRoot;
-            // // 🚧 if no slots are initially present, move content into domRoot
-            // const noSlots = this.querySelector('[slot]') === null;
-            // if (noSlots) this.moveLightToShadow();
-        } else this.root = this;
+        // Setup root to the shadow root or 'this'
+        if (this.shadowRoot) this.root = this.shadowRoot;
+        else this.root = this;
 
         // Setup assetHostKey for tracking added stylesheets
         const assetHostKey = this.assetHost === document ? 'document' : this.assetHost;
@@ -50,18 +46,23 @@ export class Base extends HTMLElement {
         if (processContent) {
             // note: scripts won't execute, listeners are lost
             const processedHtml = processPlaceholders(this.innerHTML, this);
-            if (this.root.lastElementChild) {
-                this.root.lastElementChild.insertAdjacentHTML('afterend', processedHtml);
+            if (this.shadowRoot.lastElementChild) {
+                this.shadowRoot.lastElementChild.insertAdjacentHTML('afterend', processedHtml);
             } else {
-                this.root.innerHTML += processedHtml;
+                this.shadowRoot.innerHTML += processedHtml;
             }
-            executeScripts(this.root);
+            executeScripts(this.shadowRoot);
             this.innerHTML = ''; // clear light DOM content
             return;
         }
         while (this.firstChild) {
-            this.root.appendChild(this.firstChild);
+            this.shadowRoot.appendChild(this.firstChild);
         }
+    }
+
+    slotLightToShadow() {
+        const slot = document.createElement('slot');
+        this.shadowRoot.appendChild(slot);
     }
 
     disconnectedCallback() { this.disconnected(); }
