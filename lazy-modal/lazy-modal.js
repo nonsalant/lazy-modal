@@ -46,9 +46,7 @@ export default class LazyModal extends Base {
         this.#lazyRenderTemplate = this.querySelector('& > template') || null;
         this.popover ||= '';
 
-        if (this.constructor.enableShadowRoot && !this.shadowRoot.innerHTML) {
-            this.moveLightToShadow();
-        }
+        this.moveLightToShadowIfNeeded();
     }
 
     connected() {

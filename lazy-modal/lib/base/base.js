@@ -42,6 +42,12 @@ export class Base extends HTMLElement {
         this._assetHostKey = assetHostKey;
     }
 
+    moveLightToShadowIfNeeded(processContent = false) {
+        if (this.constructor.enableShadowRoot && !this.shadowRoot.innerHTML) {
+            this.moveLightToShadow(processContent);
+        }
+    }
+
     moveLightToShadow(processContent = false) {
         if (processContent) {
             // note: scripts won't execute, listeners are lost
