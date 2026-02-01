@@ -227,3 +227,31 @@ export function kbdOnly(elements) {
         el.hidden = !('keyboard' in navigator);
     });
 }
+
+
+
+/**
+ * Appends HTML content to an element, inserting before the first child if it exists.
+ * @param {Element} el - The element to append HTML to.
+ * @param {string} html - The HTML string to append.
+ * 
+ * @example
+ * appendHtml(container, '<div>New content</div>');
+ */
+export function appendHtml(el, html) {
+    if (el.firstElementChild) el.firstElementChild.insertAdjacentHTML('beforebegin', html);
+    else el.innerHTML += html;
+}
+
+/**
+ * Prepends HTML content to an element, inserting after the opening tag if a first child exists.
+ * @param {Element} el - The element to prepend HTML to.
+ * @param {string} html - The HTML string to prepend.
+ * 
+ * @example
+ * prependHtml(container, '<div>New content</div>');
+ */
+export function prependHtml(el, html) {
+    if (el.firstElementChild) el.firstElementChild.insertAdjacentHTML('afterbegin', html);
+    else el.innerHTML = html + el.innerHTML;
+}

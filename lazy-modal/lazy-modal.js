@@ -1,6 +1,6 @@
 const COMPONENT_PATH = import.meta.resolve('./');
 const { Base, getHtml } = await import(`./lib/base/base.js?path=${encodeURIComponent(COMPONENT_PATH)}`);
-import { defineElement, processPlaceholders, executeScripts } from './lib/base/base-utils.js';
+import { defineElement, processPlaceholders, executeScripts, appendHtml } from './lib/base/base-utils.js';
 import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './lib/lazy-modal-utils.js';
 
 export default class LazyModal extends Base {
@@ -162,9 +162,7 @@ export default class LazyModal extends Base {
         const content = await getHtml(htmlPath);
         const processedContent = processPlaceholders(content, this);
         // this.root.lastElementChild.after(createFragment(processedContent)); // registers custom elements too early
-        if (this.root.lastElementChild) 
-            this.root.lastElementChild.insertAdjacentHTML('afterend', processedContent); // this doesn't execute scripts
-        else this.root.innerHTML += processedContent;
+        appendHtml(this.root, processedContent); // this doesn't execute scripts
         executeScripts(this.root);
         // 📡 Dispatch a custom event
         this.dispatchContentLoadedEvent();

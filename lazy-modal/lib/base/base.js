@@ -1,4 +1,4 @@
-import { createStylesheet, looksLikeCssText, processPlaceholders, executeScripts, camelToKebab } from './base-utils.js';
+import { createStylesheet, looksLikeCssText, processPlaceholders, executeScripts, camelToKebab, appendHtml, prependHtml } from './base-utils.js';
 
 // Get the component path from the URL query parameter
 const COMPONENT_PATH = new URL(import.meta.url).searchParams.get('path');
@@ -51,11 +51,7 @@ export class Base extends HTMLElement {
         if (processContent) {
             // note: scripts won't execute, listeners are lost
             const processedHtml = processPlaceholders(this.innerHTML, this);
-            if (this.shadowRoot.lastElementChild) {
-                this.shadowRoot.lastElementChild.insertAdjacentHTML('afterend', processedHtml);
-            } else {
-                this.shadowRoot.innerHTML += processedHtml;
-            }
+            appendHtml(this.shadowRoot, processedHtml);
             executeScripts(this.shadowRoot);
             this.innerHTML = ''; // clear light DOM content
             return;
@@ -91,10 +87,8 @@ export class Base extends HTMLElement {
         // this.root.firstElementChild.before(createFragment(processedBeforeHtml));
         // this.root.lastElementChild.after(createFragment(processedHtml)); // registers custom elements too early
 
-        if (this.root.firstElementChild) this.root.firstElementChild.insertAdjacentHTML('beforebegin', processedBeforeHtml);
-        else this.root.innerHTML += processedBeforeHtml;
-        if (this.root.lastElementChild) this.root.lastElementChild.insertAdjacentHTML('afterend', processedHtml);
-        else this.root.innerHTML += processedHtml;
+        prependHtml(this.root, processedBeforeHtml);
+        appendHtml(this.root, processedHtml);
 
         executeScripts(this.root);
 
