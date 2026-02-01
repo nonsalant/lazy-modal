@@ -10,7 +10,7 @@ globalThis._cssLocks ??= new Map(); // Map of assetHost -> Promise (lock)
 export class Base extends HTMLElement {
     static enableShadowRoot = false;
     static styles = [];
-    static baseStyle = '.dom-root { display: contents; }';
+    static baseStyle = '';
     static globalStyles = [];
     static globalBaseStyle = '';
 
@@ -22,7 +22,6 @@ export class Base extends HTMLElement {
         const needsShadow = this.constructor.enableShadowRoot && !this.shadowRoot;
         if (needsShadow) {
             this.attachShadow({ mode: 'open' });
-            // this.shadowRoot.innerHTML = `<div class="dom-root"></div>`;
         }
 
         // Current shadow root or the first parent shadow root or 'document':
