@@ -4,7 +4,7 @@ import { defineElement, processPlaceholders, executeScripts } from './lib/base/b
 import { csvToArray, isRemoteUrl, observeIntersection, unobserveIntersection } from './lib/lazy-modal-utils.js';
 
 export default class LazyModal extends Base {
-    static enableShadowRoot = true;
+    // static enableShadowRoot = true;
     static styles = [
         // `h1 { text-decoration: underline; }`,
         // 'lazy-modal.css',
@@ -39,15 +39,16 @@ export default class LazyModal extends Base {
             ? this.getAttribute('load-on')
             : 'hover';
 
-        this.#assetHost = this.hasAttribute('in-head') ? document.head : this.domRoot;
+        this.#assetHost = this.hasAttribute('in-head') ? document.head : this.root;
         this.#styles = csvToArray(this.getAttribute('inner-styles'));
         this.#scripts = csvToArray(this.getAttribute('inner-scripts'));
         this.#modalContent = this.getAttribute('inner-content') || '';
         this.#lazyRenderTemplate = this.querySelector('& > template') || null;
         this.popover ||= '';
 
-        if (this.constructor.enableShadowRoot) {
-            this.domRoot.insertAdjacentHTML('beforeend', '<slot></slot>');
+        if (this.constructor.enableShadowRoot && !this.shadowRoot.innerHTML) {
+            // this.root.lastElementChild.insertAdjacentHTML('afterend', '<slot></slot>');
+            this.shadowRoot.innerHTML = '<slot></slot>';
         }
     }
 
@@ -149,7 +150,7 @@ export default class LazyModal extends Base {
 
     afterRender() {
         // Called after the modal is rendered
-        this.domRoot.querySelector('.close-button')?.addEventListener('click', () => this.hidePopover());
+        this.root.querySelector('.close-button')?.addEventListener('click', () => this.hidePopover());
     }
 
     /** 
@@ -163,10 +164,10 @@ export default class LazyModal extends Base {
         if (!htmlPath) return; // No content to add
         const content = await getHtml(htmlPath);
         const processedContent = processPlaceholders(content, this);
-        // this.domRoot.appendChild(createFragment(processedContent)); // registers custom elements too early
-        this.domRoot.insertAdjacentHTML('beforeend', processedContent); // note: this doesn't execute scripts
+        // this.root.lastElementChild.after(createFragment(processedContent)); // registers custom elements too early
+        this.root.lastElementChild.insertAdjacentHTML('afterend', processedContent); // note: this doesn't execute scripts
         // executeScripts(this);
-        executeScripts(this.domRoot);
+        executeScripts(this.root);
         // 📡 Dispatch a custom event
         this.dispatchContentLoadedEvent();
     }

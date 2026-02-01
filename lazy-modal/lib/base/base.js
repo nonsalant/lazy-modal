@@ -22,20 +22,20 @@ export class Base extends HTMLElement {
         const needsShadow = this.constructor.enableShadowRoot && !this.shadowRoot;
         if (needsShadow) {
             this.attachShadow({ mode: 'open' });
-            this.shadowRoot.innerHTML = `<div class="dom-root"></div>`;
+            // this.shadowRoot.innerHTML = `<div class="dom-root"></div>`;
         }
 
         // Current shadow root or the first parent shadow root or 'document':
         this.assetHost = this.shadowRoot ?? this.getRootNode();
         // console.log(this.constructor.name, this.assetHost);
 
-        // Setup domRoot to the shadow root's first element child or 'this'
+        // Setup root to the shadow root child or 'this'
         if (this.shadowRoot) {
-            this.domRoot = this.shadowRoot.firstElementChild;
+            this.root = this.shadowRoot;
             // // 🚧 if no slots are initially present, move content into domRoot
             // const noSlots = this.querySelector('[slot]') === null;
             // if (noSlots) this.moveLightDomToDomRoot();
-        } else this.domRoot = this;
+        } else this.root = this;
 
         // Setup assetHostKey for tracking added stylesheets
         const assetHostKey = this.assetHost === document ? 'document' : this.assetHost;
@@ -75,13 +75,15 @@ export class Base extends HTMLElement {
         const processedBeforeHtml = processPlaceholders(beforeMarkup, this);
         const processedHtml = processPlaceholders(markup, this); // or: processPlaceholders(markup, { myValue: 'yoo' });
 
-        // this.domRoot.prepend(createFragment(processedBeforeHtml));
-        // this.domRoot.appendChild(createFragment(processedHtml)); // registers custom elements too early
+        // this.root.firstElementChild.before(createFragment(processedBeforeHtml));
+        // this.root.lastElementChild.after(createFragment(processedHtml)); // registers custom elements too early
 
-        this.domRoot.insertAdjacentHTML('afterbegin', processedBeforeHtml);
-        this.domRoot.insertAdjacentHTML('beforeend', processedHtml); // note: this doesn't execute scripts
+        if (this.root.firstElementChild) this.root.firstElementChild.insertAdjacentHTML('beforebegin', processedBeforeHtml);
+        else this.root.innerHTML += processedBeforeHtml;
+        if (this.root.lastElementChild) this.root.lastElementChild.insertAdjacentHTML('afterend', processedHtml);
+        else this.root.innerHTML += processedHtml;
 
-        executeScripts(this.domRoot);
+        executeScripts(this.root);
 
         await this.afterRender();
     }
