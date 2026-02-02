@@ -45,8 +45,6 @@ export default class LazyModal extends Base {
         this.#modalContent = this.getAttribute('inner-content') || '';
         this.#lazyRenderTemplate = this.querySelector('& > template') || null;
         this.popover ||= '';
-
-        this.moveLightToShadowIfNeeded();
     }
 
     connected() {

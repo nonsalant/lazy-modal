@@ -69,6 +69,7 @@ export class Base extends HTMLElement {
     disconnectedCallback() { this.disconnected(); }
 
     connectedCallback() {
+        this.moveLightToShadowIfNeeded();
         this.connected();
         if (this.initialized) return;
         this.initialized = true;
